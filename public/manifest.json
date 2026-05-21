@@ -1,0 +1,18 @@
+{
+  "short_name": "BTC DCA",
+  "name": "Bitcoin DCA Portfolio Tracker",
+  "description": "เว็บบันทึกข้อมูลการออมแบบ Dollar-Cost Averaging ในบิตคอยน์ส่วนตัวของคุณ ปลอดภัย 100% Client-Side",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "start_url": "/",
+  "background_color": "#090c15",
+  "theme_color": "#121622",
+  "display": "standalone",
+  "orientation": "portrait"
+}

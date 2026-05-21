@@ -1,0 +1,382 @@
+<!doctype html>
+<html lang="th">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    
+    <!-- SEO & Metadata -->
+    <title>BTC DCA Portfolio - พอร์ตโฟลิโอบันทึกการออมบิตคอยน์</title>
+    <meta name="description" content="เว็บบันทึกข้อมูลการออมแบบ DCA (Dollar-Cost Averaging) ในบิตคอยน์ส่วนตัวของคุณ บันทึกราคาทุน คำนวณ Satoshi และติดตามความคืบหน้าสู่เป้าหมาย 1 BTC แบบเรียลไทม์" />
+    
+    <!-- PWA & Mobile Standalone Optimization -->
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#121622" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="BTC DCA" />
+    <link rel="apple-touch-icon" href="/favicon.svg" />
+
+    <!-- Link Premium Stylesheet -->
+    <link rel="stylesheet" href="/src/style.css" />
+  </head>
+  <body>
+    <div class="app-container">
+      
+      <!-- Premium Header Section -->
+      <header class="app-header">
+        <div class="logo-container">
+          <div class="logo-icon">
+            <img src="/bitcoin-logo.svg" alt="Bitcoin" width="38" height="38" />
+          </div>
+          <div class="logo-text">
+            <div class="portfolio-title-wrapper">
+              <h1 id="app-portfolio-title" class="editable-title" title="คลิกเพื่อเปลี่ยนชื่อพอร์ต">BTC DCA Portfolio</h1>
+              <svg class="edit-icon" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 20h9"></path>
+                <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+              </svg>
+            </div>
+            <div class="live-price-group">
+              <span class="live-pulse-dot"></span>
+              <span id="live-btc-thb" class="live-price-thb">฿0.00</span>
+              <span class="price-separator">|</span>
+              <span id="live-btc-usd" class="live-price-usd">$0.00</span>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Header Action Controls -->
+        <div class="header-actions">
+          <!-- Currency Toggle Switch -->
+          <div class="currency-toggle-wrapper">
+            <button class="currency-btn active" id="currency-thb-btn" title="แสดงผลเป็นเงินบาท (THB)">฿ THB</button>
+            <button class="currency-btn" id="currency-usd-btn" title="แสดงผลเป็นเงินดอลลาร์ (USD)">$ USD</button>
+          </div>
+
+          <button class="action-btn" id="toggle-visibility-btn" title="ซ่อน/แสดง ยอดเงิน">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" id="eye-icon">
+              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+              <circle cx="12" cy="12" r="3"></circle>
+            </svg>
+          </button>
+          <button class="action-btn" id="toggle-theme-btn" title="สลับธีม มืดหรูหรา / ดำสนิท (Pitch Black)">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" id="theme-icon">
+              <circle cx="12" cy="12" r="10"></circle>
+              <path d="M12 2a10 10 0 0 0 0 20V2z"></path>
+            </svg>
+          </button>
+          <button class="action-btn" id="share-trigger-btn" title="แชร์ภาพการ์ดสรุปพอร์ตโฟลิโอของคุณ">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path>
+              <polyline points="16 6 12 2 8 6"></polyline>
+              <line x1="12" y1="2" x2="12" y2="15"></line>
+            </svg>
+          </button>
+          <button class="action-btn" id="settings-trigger-btn" title="การตั้งค่า & สำรองข้อมูล">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="3"></circle>
+              <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+            </svg>
+          </button>
+        </div>
+      </header>
+
+      <!-- Main Layout Dashboard -->
+      <main class="dashboard-container">
+        
+        <!-- Target Goal Progress Section -->
+        <section class="glass-card goal-section">
+          <div class="goal-header">
+            <div class="goal-col">
+              <span class="goal-label">สะสมแล้ว (BTC)</span>
+              <div class="goal-value" id="accumulated-btc-display">0.00000000</div>
+            </div>
+            <div class="goal-col align-right">
+              <span class="goal-label">เป้าหมาย (BTC)</span>
+              <div class="goal-value muted-target" id="target-btc-display">1.00000000</div>
+            </div>
+          </div>
+          
+          <!-- Glowing Progress Bar -->
+          <div class="progress-bar-container">
+            <div class="progress-bar-fill" id="progress-bar-fill" style="width: 0%"></div>
+          </div>
+          
+          <div class="goal-footer">
+            <span class="remaining-text" id="remaining-btc-display">เหลืออีก: 1.00000000 BTC</span>
+            <span class="progress-badge" id="progress-percent-badge">0.00%</span>
+          </div>
+        </section>
+
+        <!-- Stats Overview Cards Grid -->
+        <section class="stats-grid">
+          
+          <!-- Current Value Card -->
+          <div class="glass-card stat-card">
+            <span class="stat-label">มูลค่าปัจจุบัน</span>
+            <div class="stat-value highlight-currency" id="current-value-display">฿0.00</div>
+            <span class="stat-sub-label" id="ref-price-display">อ้างอิง: ฿0.00</span>
+          </div>
+
+          <!-- Total Invested Card -->
+          <div class="glass-card stat-card">
+            <span class="stat-label">ต้นทุนทั้งหมด</span>
+            <div class="stat-value" id="total-cost-display">฿0.00</div>
+            <span class="stat-sub-label" id="avg-price-display">เฉลี่ย: ฿0.00</span>
+          </div>
+
+          <!-- Profit Loss Card -->
+          <div class="glass-card stat-card success-theme" id="profit-loss-card">
+            <span class="stat-label">กำไร / ขาดทุน</span>
+            <div class="stat-value" id="profit-loss-display">+฿0.00</div>
+            <span class="profit-loss-badge-wrapper">
+              <span class="progress-badge positive" id="profit-loss-percent">+0.00%</span>
+            </span>
+          </div>
+
+        </section>
+
+        <!-- Premium Portfolio Trend Chart Card -->
+        <section class="glass-card chart-card">
+          <div class="chart-header">
+            <h3 class="chart-title">แนวโน้มพอร์ตโฟลิโอสะสม (Portfolio Growth Trend)</h3>
+            <div class="chart-actions">
+              <span class="chart-legend-dot val-dot"></span> <span class="chart-legend-text">มูลค่าพอร์ตสุทธิ</span>
+              <span class="chart-legend-dot cost-dot" style="margin-left: 10px;"></span> <span class="chart-legend-text">เงินต้นที่ออมสะสม</span>
+            </div>
+          </div>
+          <div class="chart-wrapper">
+            <div id="portfolio-growth-chart"></div>
+          </div>
+        </section>
+
+        <!-- Total Satoshis Showcase Card -->
+        <section class="glass-card satoshi-card">
+          <div class="satoshi-details">
+            <span class="satoshi-label">บิตคอยน์ทั้งหมด (SATOSHI)</span>
+            <div class="satoshi-value" id="total-satoshi-display">0</div>
+          </div>
+          <div class="wallet-icon-wrapper">
+            <img src="/satoshi-logo.svg" alt="Satoshi" width="28" height="28" class="satoshi-icon-img" />
+          </div>
+        </section>
+
+        <!-- DCA Logger Form -->
+        <section class="glass-card form-card">
+          <h3 class="form-title">
+            <span class="plus-icon">+</span> บันทึก DCA
+          </h3>
+          <form id="dca-log-form" class="logger-form">
+            <div class="form-grid">
+              
+              <!-- Date input -->
+              <div class="form-group">
+                <label for="input-date">วันที่</label>
+                <input type="date" id="input-date" required />
+              </div>
+
+              <!-- Invested Amount in Baht -->
+              <div class="form-group">
+                <label for="input-amount">จำนวนเงิน (บาท)</label>
+                <input type="number" id="input-amount" min="1" step="any" placeholder="0.00" required />
+              </div>
+
+              <!-- Purchase Price (THB/BTC) -->
+              <div class="form-group">
+                <label for="input-price">ราคาที่ซื้อ (บาท/BTC)</label>
+                <input type="number" id="input-price" min="1" step="any" placeholder="ป้อนราคาซื้อ" required />
+              </div>
+
+              <!-- Sat quantity (calculated read-only) -->
+              <div class="form-group">
+                <label for="input-sat" class="sat-label">
+                  <span>จำนวน Sat</span>
+                  <span class="calc-tag">(คำนวณอัตโนมัติ)</span>
+                </label>
+                <input type="text" id="input-sat" class="read-only-input" readonly placeholder="0" />
+              </div>
+
+              <!-- Save button -->
+              <div class="form-submit-wrapper">
+                <button type="submit" class="submit-btn" id="submit-form-btn">บันทึกข้อมูล</button>
+              </div>
+
+            </div>
+          </form>
+        </section>
+
+        <!-- Purchase Ledger History List -->
+        <section class="glass-card ledger-card">
+          <h3 class="ledger-title">ประวัติการบันทึกข้อมูลการซื้อ</h3>
+          <div class="ledger-table-responsive">
+            <table class="ledger-table">
+              <thead>
+                <tr>
+                  <th>วันที่</th>
+                  <th>จำนวนเงิน (บาท)</th>
+                  <th>ราคาซื้อ (บาท/BTC)</th>
+                  <th>ได้รับ (BTC)</th>
+                  <th>ได้รับ (SATOSHI)</th>
+                  <th id="th-profit-loss">กำไร/ขาดทุน</th>
+                  <th style="width: 60px; text-align: center;">จัดการ</th>
+                </tr>
+              </thead>
+              <tbody id="ledger-table-body">
+                <!-- Log entries inserted here dynamically -->
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+      </main>
+
+      <!-- Settings and Backup Modal Dialog -->
+      <div class="modal-overlay" id="settings-modal">
+        <div class="modal-card">
+          <div class="modal-header">
+            <h3>การตั้งค่า & สำรองข้อมูล</h3>
+            <button class="modal-close" id="settings-close-btn">&times;</button>
+          </div>
+          <div class="modal-body">
+            
+            <!-- Customize Portfolio Name -->
+            <div class="modal-section">
+              <label for="setting-portfolio-name" class="modal-label">ชื่อพอร์ตโฟลิโอของคุณ</label>
+              <div class="modal-input-wrapper">
+                <input type="text" id="setting-portfolio-name" value="BTC DCA Portfolio" maxlength="25" placeholder="เช่น พอร์ตออมบิตคอยน์ของฉัน" required />
+              </div>
+            </div>
+
+            <!-- Customize Target BTC Goal -->
+            <div class="modal-section">
+              <label for="setting-target-btc" class="modal-label">เป้าหมายการสะสม Bitcoin (BTC)</label>
+              <div class="modal-input-wrapper">
+                <input type="number" id="setting-target-btc" min="0.00000001" step="0.00000001" value="1.0" required />
+                <span class="input-suffix">BTC</span>
+              </div>
+            </div>
+
+            <!-- Backup and restore options -->
+            <div class="modal-section">
+              <label class="modal-label">ความปลอดภัยและสำรองข้อมูล</label>
+              <div class="modal-button-grid">
+                <button class="modal-btn secondary" id="export-backup-btn">
+                  📤 ส่งออกข้อมูลสำรอง (Export JSON)
+                </button>
+                <button class="modal-btn secondary" id="import-backup-trigger-btn">
+                  📥 นำเข้าข้อมูลสำรอง (Import JSON)
+                </button>
+                <input type="file" id="import-file-input" style="display: none;" accept=".json" />
+              </div>
+            </div>
+
+            <!-- Danger Zone -->
+            <div class="modal-section danger-zone">
+              <label class="modal-label text-danger">เขตอันตราย (Danger Zone)</label>
+              <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.75rem;">
+                การล้างข้อมูลจะลบรายการบันทึก DCA ทั้งหมดออกจากบราวเซอร์นี้อย่างถาวร กรุณาส่งออกข้อมูลเพื่อสำรองไว้ก่อนดำเนินการ
+              </p>
+              <button class="modal-btn danger" id="clear-all-data-btn">
+                ⚠️ ลบข้อมูลรายการทั้งหมด
+              </button>
+            </div>
+
+            <!-- API Data Credit Section (แบบ B) -->
+            <div class="modal-section api-credits-section" style="margin-top: 1.25rem; padding-top: 1rem; border-top: 1px dashed rgba(255, 255, 255, 0.06); text-align: center;">
+              <p style="font-size: 0.72rem; color: var(--text-muted); line-height: 1.5; font-family: var(--font-body);">
+                ราคาดึงเรียลไทม์ผ่าน <a href="https://www.cryptocompare.com" target="_blank" rel="noopener noreferrer" style="color: var(--primary); text-decoration: none; font-weight: 500;">CryptoCompare</a> &amp; <a href="https://api.coinbase.com" target="_blank" rel="noopener noreferrer" style="color: var(--primary); text-decoration: none; font-weight: 500;">Coinbase</a><br>
+                อัตราแลกเปลี่ยนแปลงค่าเงินโดย <a href="https://www.exchangerate-api.com" target="_blank" rel="noopener noreferrer" style="color: var(--primary); text-decoration: none; font-weight: 500;">ExchangeRate-API</a>
+              </p>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- Social Share Modal Dialog -->
+      <div class="modal-overlay" id="share-modal">
+        <div class="modal-card share-modal-card">
+          <div class="modal-header">
+            <h3>แชร์พอร์ตโฟลิโอสะสมบิตคอยน์</h3>
+            <button class="modal-close" id="share-close-btn">&times;</button>
+          </div>
+          <div class="modal-body share-modal-body">
+            
+            <!-- Format selector -->
+            <div class="share-options-group">
+              <label class="modal-label">รูปแบบอัตราส่วนภาพ</label>
+              <div class="ratio-toggle-wrapper">
+                <button class="ratio-btn active" id="ratio-square-btn">Square (1:1)</button>
+                <button class="ratio-btn" id="ratio-story-btn">Story (9:16)</button>
+              </div>
+            </div>
+
+            <!-- Portfolio Title input -->
+            <div class="share-options-group">
+              <label for="share-portfolio-title" class="modal-label">ระบุชื่อพอร์ตสำหรับการแชร์</label>
+              <input type="text" id="share-portfolio-title" value="My Bitcoin DCA" max="25" placeholder="เช่น พอร์ตออมบิตคอยน์ของฉัน" />
+            </div>
+
+            <!-- Visual Toggle Options -->
+            <div class="share-options-group">
+              <label class="modal-label">การตั้งค่าการ์ดแชร์</label>
+              <div class="share-toggles-container">
+                <div class="share-toggle-row">
+                  <span class="share-toggle-label">แสดงผลตอบแทนรวม (Net Yield)</span>
+                  <label class="switch-control">
+                    <input type="checkbox" id="share-show-yield" checked />
+                    <span class="switch-slider"></span>
+                  </label>
+                </div>
+                <div class="share-toggle-row">
+                  <span class="share-toggle-label">แสดงเป้าหมายความคืบหน้า (Goal Progress)</span>
+                  <label class="switch-control">
+                    <input type="checkbox" id="share-show-progress" checked />
+                    <span class="switch-slider"></span>
+                  </label>
+                </div>
+                <div class="share-toggle-row">
+                  <span class="share-toggle-label">แสดงจำนวนสะสมย่อย (SATS)</span>
+                  <label class="switch-control">
+                    <input type="checkbox" id="share-show-sats" checked />
+                    <span class="switch-slider"></span>
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <!-- Card Preview Area -->
+            <div class="share-preview-wrapper">
+              <div class="canvas-preview-container">
+                <canvas id="share-canvas" style="display: none;"></canvas>
+                <!-- Image element for dynamic high quality visual display -->
+                <img id="share-preview-image" src="" alt="พรีวิวการ์ดแชร์" />
+              </div>
+            </div>
+
+            <!-- Share Buttons Actions -->
+            <div class="share-actions-grid">
+              <button class="modal-btn secondary" id="copy-share-card-btn">
+                📋 คัดลอกรูปภาพ (Copy Image)
+              </button>
+              <button class="submit-btn" id="download-share-card-btn">
+                💾 ดาวน์โหลดรูปภาพ (Download PNG)
+              </button>
+            </div>
+            
+            <!-- Web Share fallback -->
+            <div class="share-footer-link" id="web-share-wrapper" style="display: none;">
+              <button class="web-share-text-btn" id="native-share-btn">📲 เปิดเมนูแชร์ของระบบมือถือ (Native Share)</button>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Main Module script -->
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>
