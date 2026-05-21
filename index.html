@@ -250,65 +250,136 @@
       <div class="modal-overlay" id="settings-modal">
         <div class="modal-card">
           <div class="modal-header">
-            <h3>การตั้งค่า & สำรองข้อมูล</h3>
+            <h3>การตั้งค่า &amp; ข้อมูลช่วยเหลือ</h3>
             <button class="modal-close" id="settings-close-btn">&times;</button>
           </div>
+          
+          <!-- Modern Tab Navigation -->
+          <div class="modal-tabs">
+            <button class="modal-tab-btn active" id="tab-btn-settings">⚙️ ตั้งค่าพอร์ต</button>
+            <button class="modal-tab-btn" id="tab-btn-guide">💡 คู่มือการออม DCA</button>
+          </div>
+
           <div class="modal-body">
             
-            <!-- Customize Portfolio Name -->
-            <div class="modal-section">
-              <label for="setting-portfolio-name" class="modal-label">ชื่อพอร์ตโฟลิโอของคุณ</label>
-              <div class="modal-input-wrapper">
-                <input type="text" id="setting-portfolio-name" value="BTC DCA Portfolio" maxlength="25" placeholder="เช่น พอร์ตออมบิตคอยน์ของฉัน" required />
-              </div>
-            </div>
-
-            <!-- Customize Target BTC Goal -->
-            <div class="modal-section">
-              <label for="setting-target-btc" class="modal-label">เป้าหมายการสะสม Bitcoin (BTC)</label>
-              <div class="modal-input-wrapper">
-                <input type="number" id="setting-target-btc" min="0.00000001" step="0.00000001" value="1.0" required />
-                <span class="input-suffix">BTC</span>
-              </div>
-            </div>
-
-            <!-- Backup and restore options -->
-            <div class="modal-section">
-              <label class="modal-label">ความปลอดภัยและสำรองข้อมูล</label>
-              <div class="modal-button-grid" style="grid-template-columns: 1fr;">
-                <button class="modal-btn secondary" id="export-backup-btn">
-                  📤 ส่งออกข้อมูลสำรอง (Export JSON)
-                </button>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
-                  <button class="modal-btn secondary" id="import-backup-trigger-btn">
-                    📥 นำเข้าข้อมูลสำรอง (Import JSON)
-                  </button>
-                  <button class="modal-btn secondary" id="import-csv-trigger-btn">
-                    📄 นำเข้าประวัติเก่า (Import CSV)
-                  </button>
+            <!-- Pane 1: General Settings & Backup -->
+            <div class="tab-content active" id="pane-settings">
+              <!-- Customize Portfolio Name -->
+              <div class="modal-section">
+                <label for="setting-portfolio-name" class="modal-label">ชื่อพอร์ตโฟลิโอของคุณ</label>
+                <div class="modal-input-wrapper">
+                  <input type="text" id="setting-portfolio-name" value="BTC DCA Portfolio" maxlength="25" placeholder="เช่น พอร์ตออมบิตคอยน์ของฉัน" required />
                 </div>
-                <input type="file" id="import-file-input" style="display: none;" accept=".json" />
-                <input type="file" id="import-csv-input" style="display: none;" accept=".csv" />
+              </div>
+
+              <!-- Customize Target BTC Goal -->
+              <div class="modal-section">
+                <label for="setting-target-btc" class="modal-label">เป้าหมายการสะสม Bitcoin (BTC)</label>
+                <div class="modal-input-wrapper">
+                  <input type="number" id="setting-target-btc" min="0.00000001" step="0.00000001" value="1.0" required />
+                  <span class="input-suffix">BTC</span>
+                </div>
+              </div>
+
+              <!-- Backup and restore options -->
+              <div class="modal-section">
+                <label class="modal-label">ความปลอดภัยและสำรองข้อมูล</label>
+                <div class="modal-button-grid" style="grid-template-columns: 1fr;">
+                  <button class="modal-btn secondary" id="export-backup-btn">
+                    📤 ส่งออกข้อมูลสำรอง (Export JSON)
+                  </button>
+                  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+                    <button class="modal-btn secondary" id="import-backup-trigger-btn">
+                      📥 นำเข้าข้อมูลสำรอง (Import JSON)
+                    </button>
+                    <button class="modal-btn secondary" id="import-csv-trigger-btn">
+                      📄 นำเข้าประวัติเก่า (Import CSV)
+                    </button>
+                  </div>
+                  <input type="file" id="import-file-input" style="display: none;" accept=".json" />
+                  <input type="file" id="import-csv-input" style="display: none;" accept=".csv" />
+                </div>
+              </div>
+
+              <!-- Danger Zone -->
+              <div class="modal-section danger-zone">
+                <label class="modal-label text-danger">เขตอันตราย (Danger Zone)</label>
+                <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.75rem;">
+                  การล้างข้อมูลจะลบรายการบันทึก DCA ทั้งหมดออกจากบราวเซอร์นี้อย่างถาวร กรุณาส่งออกข้อมูลเพื่อสำรองไว้ก่อนดำเนินการ
+                </p>
+                <button class="modal-btn danger" id="clear-all-data-btn">
+                  ⚠️ ลบข้อมูลรายการทั้งหมด
+                </button>
+              </div>
+
+              <!-- API Data Credit Section (แบบ B) -->
+              <div class="modal-section api-credits-section" style="margin-top: 1.25rem; padding-top: 1rem; border-top: 1px dashed rgba(255, 255, 255, 0.06); text-align: center;">
+                <p style="font-size: 0.72rem; color: var(--text-muted); line-height: 1.5; font-family: var(--font-body);">
+                  ราคาดึงเรียลไทม์ผ่าน <a href="https://www.cryptocompare.com" target="_blank" rel="noopener noreferrer" style="color: var(--primary); text-decoration: none; font-weight: 500;">CryptoCompare</a> &amp; <a href="https://api.coinbase.com" target="_blank" rel="noopener noreferrer" style="color: var(--primary); text-decoration: none; font-weight: 500;">Coinbase</a><br>
+                  อัตราแลกเปลี่ยนแปลงค่าเงินโดย <a href="https://www.exchangerate-api.com" target="_blank" rel="noopener noreferrer" style="color: var(--primary); text-decoration: none; font-weight: 500;">ExchangeRate-API</a>
+                </p>
               </div>
             </div>
 
-            <!-- Danger Zone -->
-            <div class="modal-section danger-zone">
-              <label class="modal-label text-danger">เขตอันตราย (Danger Zone)</label>
-              <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.75rem;">
-                การล้างข้อมูลจะลบรายการบันทึก DCA ทั้งหมดออกจากบราวเซอร์นี้อย่างถาวร กรุณาส่งออกข้อมูลเพื่อสำรองไว้ก่อนดำเนินการ
-              </p>
-              <button class="modal-btn danger" id="clear-all-data-btn">
-                ⚠️ ลบข้อมูลรายการทั้งหมด
-              </button>
-            </div>
+            <!-- Pane 2: DCA Premium Guide & FAQ -->
+            <div class="tab-content" id="pane-guide">
+              
+              <!-- Section 1: What is DCA -->
+              <div class="guide-section">
+                <h4 class="guide-title">🪙 DCA บิตคอยน์ คืออะไร?</h4>
+                <p class="guide-desc">
+                  การสะสมบิตคอยน์แบบ <strong>DCA (Dollar-Cost Averaging)</strong> คือกลยุทธ์การทยอยซื้อสะสมบิตคอยน์ด้วยจำนวนเงินที่เท่ากันอย่างสม่ำเสมอตามระยะเวลาที่กำหนด (เช่น รายสัปดาห์ หรือรายเดือน) โดยไม่สนใจว่าราคา ณ ขณะนั้นจะผันผวนขึ้นหรือลงอย่างไร
+                </p>
+                <div class="guide-tips-list">
+                  <div class="guide-tip-item">
+                    <span class="guide-tip-icon">🛡️</span>
+                    <div class="guide-tip-text">
+                      <strong>ลดความเสี่ยงและความเครียด:</strong> ช่วยถัวเฉลี่ยต้นทุนของคุณ ไม่ต้องเสียเวลานั่งเฝ้ากราฟหรือคอยหาจุดซื้อต่ำสุดที่คาดเดาได้ยาก
+                    </div>
+                  </div>
+                  <div class="guide-tip-item">
+                    <span class="guide-tip-icon">📈</span>
+                    <div class="guide-tip-text">
+                      <strong>สร้างวินัยการออมที่ทรงพลัง:</strong> เปลี่ยนทัศนคติจากการเดาราคามารุกสะสมบิตคอยน์เป็นสินทรัพย์สำรองระยะยาวที่มีจำนวนจำกัด
+                    </div>
+                  </div>
+                  <div class="guide-tip-item">
+                    <span class="guide-tip-icon">⏳</span>
+                    <div class="guide-tip-text">
+                      <strong>พลังซื้อเฉลี่ยเชิงคณิตศาสตร์:</strong> ในช่วงขาลง เงินเท่าเดิมจะซื้อได้บิตคอยน์จำนวนมากขึ้นโดยอัตโนมัติ (เก็บสะสมหน่วย Satoshi ได้ไวกว่าเดิม)
+                    </div>
+                  </div>
+                </div>
+              </div>
 
-            <!-- API Data Credit Section (แบบ B) -->
-            <div class="modal-section api-credits-section" style="margin-top: 1.25rem; padding-top: 1rem; border-top: 1px dashed rgba(255, 255, 255, 0.06); text-align: center;">
-              <p style="font-size: 0.72rem; color: var(--text-muted); line-height: 1.5; font-family: var(--font-body);">
-                ราคาดึงเรียลไทม์ผ่าน <a href="https://www.cryptocompare.com" target="_blank" rel="noopener noreferrer" style="color: var(--primary); text-decoration: none; font-weight: 500;">CryptoCompare</a> &amp; <a href="https://api.coinbase.com" target="_blank" rel="noopener noreferrer" style="color: var(--primary); text-decoration: none; font-weight: 500;">Coinbase</a><br>
-                อัตราแลกเปลี่ยนแปลงค่าเงินโดย <a href="https://www.exchangerate-api.com" target="_blank" rel="noopener noreferrer" style="color: var(--primary); text-decoration: none; font-weight: 500;">ExchangeRate-API</a>
-              </p>
+              <!-- Section 2: How to use -->
+              <div class="guide-section" style="border-top: 1px solid rgba(255, 255, 255, 0.05); padding-top: 1.25rem; margin-top: 0.5rem;">
+                <h4 class="guide-title">📱 วิธีใช้งานหน้าเว็บบันทึก</h4>
+                <ol class="guide-steps">
+                  <li><strong>บันทึกยอดสะสม:</strong> ทุกครั้งที่กดซื้อจริง ให้มากดปุ่ม <span style="color: var(--primary); font-weight: 600;">"เพิ่มรายการออม"</span> ด้านล่าง ใส่ต้นทุนเงินบาท/USD และจำนวน BTC ที่ได้จริง ระบบจะคำนวณสถิติและอัพเดทประวัติพอร์ตให้ทันที</li>
+                  <li><strong>สลับค่าแสดงผล:</strong> กดสลับปุ่ม <span style="color: var(--primary); font-style: normal;">฿ THB</span> หรือ <span style="color: var(--primary); font-style: normal;">$ USD</span> ที่ด้านบน เพื่อเปรียบเทียบผลตอบแทนในระดับสากล</li>
+                  <li><strong>โหมดความเป็นส่วนตัว (Privacy Mode):</strong> คลิกรูปดวงตาด้านบนเพื่อซ่อน/แสดง ยอดเงินรวมและบิตคอยน์ทั้งหมดทันที เพื่อความปลอดภัยยามเปิดใช้งานในที่สาธารณะ</li>
+                  <li><strong>ส่งออกภาพสรุปพอร์ต:</strong> กดปุ่มแชร์รูปภาพด้านบน เพื่อดาวน์โหลดการ์ดภาพ 3D บิตคอยน์พรีเมียม สวยงาม เพื่อแบ่งปันความคืบหน้าสู่เป้าหมาย</li>
+                </ol>
+              </div>
+
+              <!-- Section 3: Privacy & Security (Self-Custody) -->
+              <div class="guide-section" style="border-top: 1px solid rgba(255, 255, 255, 0.05); padding-top: 1.25rem; margin-top: 0.5rem;">
+                <h4 class="guide-title">🔒 ความปลอดภัยและความเป็นส่วนตัวของข้อมูล</h4>
+                <div class="premium-callout-box">
+                  <div class="callout-header">
+                    <span class="callout-icon">💎</span>
+                    <strong>ระบบเก็บข้อมูลแบบเป็นส่วนตัว 100% (No Server)</strong>
+                  </div>
+                  <p class="callout-desc">
+                    ข้อมูลพอร์ตโฟลิโอและรายการเดินบัญชีทั้งหมดของคุณจะถูกบันทึกและจัดเก็บไว้ใน <strong>LocalStorage บนเบราว์เซอร์ส่วนตัวของคุณเท่านั้น</strong> เว็บไซต์นี้ไม่มีฐานข้อมูลส่วนกลางและไม่มีระบบเก็บข้อมูลส่วนตัวใด ๆ ส่งออกไปภายนอก ข้อมูลการเงินทั้งหมดของคุณจึงมีความเป็นส่วนตัวและปลอดภัยสูงสุด
+                  </p>
+                </div>
+                <p class="guide-desc" style="font-size: 0.78rem; color: var(--text-muted); line-height: 1.5; margin-top: 0.75rem;">
+                  ⚠️ <strong>ข้อแนะนำสำคัญ:</strong> เนื่องจากข้อมูลถูกฝากไว้ในเบราว์เซอร์ของคุณ หากคุณล้างประวัติเว็บ (Clear History/Cache) ข้อมูลจะถูกลบไปด้วย แนะนำให้ใช้ปุ่ม <strong>"ส่งออกข้อมูลสำรอง (Export JSON)"</strong> บนแท็บแรกบันทึกเก็บไว้เป็นระยะ เพื่อความปลอดภัยของข้อมูลพอร์ตโฟลิโอครับ
+                </p>
+              </div>
+
             </div>
 
           </div>

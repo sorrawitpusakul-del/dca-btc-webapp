@@ -773,9 +773,23 @@ function setDefaultDate() {
  * Settings Modal trigger bindings.
  */
 function initSettingsModal() {
+  const tabBtnSettings = document.getElementById('tab-btn-settings');
+  const tabBtnGuide = document.getElementById('tab-btn-guide');
+  const paneSettings = document.getElementById('pane-settings');
+  const paneGuide = document.getElementById('pane-guide');
+
   elSettingsTriggerBtn.addEventListener('click', () => {
     if (elSettingPortfolioName) elSettingPortfolioName.value = state.portfolioName;
     elSettingTargetBtc.value = state.targetBtc;
+    
+    // Reset to General Settings tab on open
+    if (tabBtnSettings && tabBtnGuide && paneSettings && paneGuide) {
+      tabBtnSettings.classList.add('active');
+      tabBtnGuide.classList.remove('active');
+      paneSettings.classList.add('active');
+      paneGuide.classList.remove('active');
+    }
+    
     elSettingsModal.classList.add('active');
   });
 
@@ -788,6 +802,23 @@ function initSettingsModal() {
       elSettingsModal.classList.remove('active');
     }
   });
+
+  // Tab switching event listeners
+  if (tabBtnSettings && tabBtnGuide && paneSettings && paneGuide) {
+    tabBtnSettings.addEventListener('click', () => {
+      tabBtnSettings.classList.add('active');
+      tabBtnGuide.classList.remove('active');
+      paneSettings.classList.add('active');
+      paneGuide.classList.remove('active');
+    });
+
+    tabBtnGuide.addEventListener('click', () => {
+      tabBtnGuide.classList.add('active');
+      tabBtnSettings.classList.remove('active');
+      paneGuide.classList.add('active');
+      paneSettings.classList.remove('active');
+    });
+  }
 
   // Portfolio Name changes
   if (elSettingPortfolioName) {

@@ -795,6 +795,170 @@ input:focus {
   box-shadow: 0 0 15px rgba(255, 23, 68, 0.3);
 }
 
+/* Tabs for Settings & Guide Modal */
+.modal-tabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  background-color: rgba(255, 255, 255, 0.02);
+  border-bottom: 1px solid var(--border-light);
+}
+
+.modal-tab-btn {
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  padding: 1rem;
+  color: var(--text-secondary);
+  font-family: var(--font-heading);
+  font-weight: 600;
+  font-size: 0.88rem;
+  cursor: pointer;
+  transition: var(--transition);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.modal-tab-btn:hover {
+  color: var(--text-primary);
+  background-color: rgba(255, 255, 255, 0.02);
+}
+
+.modal-tab-btn.active {
+  color: var(--primary);
+  border-bottom: 2px solid var(--primary);
+  background-color: rgba(247, 147, 26, 0.04);
+}
+
+/* Tab contents and toggle display */
+.tab-content {
+  display: none;
+  flex-direction: column;
+  gap: 1.5rem;
+  width: 100%;
+}
+
+.tab-content.active {
+  display: flex;
+}
+
+/* Premium DCA Guide Typography and Cards */
+.guide-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.guide-title {
+  font-family: var(--font-heading);
+  font-size: 0.95rem;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0;
+}
+
+.guide-desc {
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  margin: 0;
+}
+
+.guide-tips-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-top: 0.25rem;
+}
+
+.guide-tip-item {
+  display: flex;
+  gap: 0.75rem;
+  align-items: flex-start;
+  background-color: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  border-radius: var(--radius-md);
+  padding: 0.75rem;
+  transition: var(--transition);
+}
+
+.guide-tip-item:hover {
+  background-color: rgba(255, 255, 255, 0.04);
+  border-color: rgba(247, 147, 26, 0.18);
+}
+
+.guide-tip-icon {
+  font-size: 1.1rem;
+  line-height: 1;
+}
+
+.guide-tip-text {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  line-height: 1.55;
+}
+
+.guide-tip-text strong {
+  color: var(--text-primary);
+  display: block;
+  margin-bottom: 0.2rem;
+}
+
+.guide-steps {
+  margin: 0;
+  padding-left: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.guide-steps li {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+.guide-steps li strong {
+  color: var(--text-primary);
+}
+
+/* Premium Callout Box (Glassmorphic Orange Glow) */
+.premium-callout-box {
+  background: linear-gradient(135deg, rgba(247, 147, 26, 0.07) 0%, rgba(255, 179, 71, 0.02) 100%);
+  border: 1px solid rgba(247, 147, 26, 0.2);
+  border-radius: var(--radius-md);
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: 0.25rem;
+  box-shadow: 0 4px 20px rgba(247, 147, 26, 0.03);
+}
+
+.callout-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--primary);
+  font-family: var(--font-heading);
+}
+
+.callout-icon {
+  font-size: 1.05rem;
+}
+
+.callout-desc {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  line-height: 1.55;
+  margin: 0;
+}
+
 .danger-zone {
   border-top: 1px dashed var(--border-light);
   padding-top: 1.25rem;
