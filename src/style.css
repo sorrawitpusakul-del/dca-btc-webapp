@@ -1432,6 +1432,39 @@ body.theme-pitch-black .apexcharts-xaxistooltip {
     gap: 1rem;
   }
   
+  .logo-container {
+    width: 100%;
+    align-items: center;
+  }
+  
+  .logo-text {
+    display: flex;
+    flex: 1;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .live-price-group {
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0;
+    margin-top: 0;
+  }
+
+  .live-price-thb {
+    font-size: 1.25rem;
+    font-weight: 800;
+  }
+  
+  .live-price-usd {
+    font-size: 0.95rem;
+    font-weight: 700;
+  }
+
+  .price-separator {
+    display: none;
+  }
+
   .header-actions {
     width: 100%;
     flex-wrap: wrap;
@@ -1498,17 +1531,14 @@ body.theme-pitch-black .apexcharts-xaxistooltip {
 }
 
 @media (max-width: 480px) {
-  .logo-container {
-    flex-direction: column;
-    align-items: flex-start;
+  .logo-text h1 {
+    font-size: 1rem;
   }
-  .live-price-group {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0.2rem;
+  .live-price-thb {
+    font-size: 1.15rem;
   }
-  .price-separator {
-    display: none;
+  .live-price-usd {
+    font-size: 0.85rem;
   }
 }
 
