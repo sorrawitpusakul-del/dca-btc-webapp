@@ -1,7 +1,11 @@
 import './style.css';
+import { inject } from '@vercel/analytics';
 import { calculatePortfolioStats, calculateSatoshis, generateChartData } from './services/dcaEngine.js';
 import { fetchLiveData } from './services/api.js';
 import ApexCharts from 'apexcharts';
+
+// Initialize Vercel Web Analytics
+inject();
 
 // Register Service Worker for PWA Standalone & Offline Capabilities
 if ('serviceWorker' in navigator && import.meta.env.PROD) {
