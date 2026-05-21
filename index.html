@@ -275,14 +275,20 @@
             <!-- Backup and restore options -->
             <div class="modal-section">
               <label class="modal-label">ความปลอดภัยและสำรองข้อมูล</label>
-              <div class="modal-button-grid">
+              <div class="modal-button-grid" style="grid-template-columns: 1fr;">
                 <button class="modal-btn secondary" id="export-backup-btn">
                   📤 ส่งออกข้อมูลสำรอง (Export JSON)
                 </button>
-                <button class="modal-btn secondary" id="import-backup-trigger-btn">
-                  📥 นำเข้าข้อมูลสำรอง (Import JSON)
-                </button>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+                  <button class="modal-btn secondary" id="import-backup-trigger-btn">
+                    📥 นำเข้าข้อมูลสำรอง (Import JSON)
+                  </button>
+                  <button class="modal-btn secondary" id="import-csv-trigger-btn">
+                    📄 นำเข้าประวัติเก่า (Import CSV)
+                  </button>
+                </div>
                 <input type="file" id="import-file-input" style="display: none;" accept=".json" />
+                <input type="file" id="import-csv-input" style="display: none;" accept=".csv" />
               </div>
             </div>
 

@@ -81,6 +81,8 @@ const elSettingTargetBtc = document.getElementById('setting-target-btc');
 const elExportBackupBtn = document.getElementById('export-backup-btn');
 const elImportBackupTriggerBtn = document.getElementById('import-backup-trigger-btn');
 const elImportFileInput = document.getElementById('import-file-input');
+const elImportCsvTriggerBtn = document.getElementById('import-csv-trigger-btn');
+const elImportCsvInput = document.getElementById('import-csv-input');
 const elClearAllDataBtn = document.getElementById('clear-all-data-btn');
 
 /**
@@ -875,6 +877,131 @@ function initSettingsModal() {
     // Clear value to allow re-importing the same file
     elImportFileInput.value = '';
   });
+
+  // Import CSV click trigger
+  if (elImportCsvTriggerBtn) {
+    elImportCsvTriggerBtn.addEventListener('click', () => {
+      elImportCsvInput.click();
+    });
+  }
+
+  // Import CSV File parsing
+  if (elImportCsvInput) {
+    elImportCsvInput.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      
+      if (!file.name.toLowerCase().endsWith('.csv')) {
+        alert('กรุณาเลือกไฟล์ .csv เท่านั้น');
+        elImportCsvInput.value = '';
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = function(evt) {
+        try {
+          const csvData = evt.target.result;
+          const lines = csvData.split('\n');
+          
+          // Helper to parse CSV row accounting for quoted values
+          const parseCSVLine = (str) => {
+            const result = [];
+            let current = '';
+            let inQuotes = false;
+            for (let i = 0; i < str.length; i++) {
+              const char = str[i];
+              if (char === '"') {
+                inQuotes = !inQuotes;
+              } else if (char === ',' && !inQuotes) {
+                result.push(current);
+                current = '';
+              } else {
+                current += char;
+              }
+            }
+            result.push(current);
+            return result;
+          };
+
+          const cleanNum = (val) => parseFloat(String(val).replace(/[^0-9.-]+/g, '')) || 0;
+
+          const importedRecords = [];
+          let addedCount = 0;
+          
+          for (let i = 0; i < lines.length; i++) {
+            const line = lines[i].trim();
+            if (!line) continue;
+            
+            const cols = parseCSVLine(line);
+            
+            // Check if it's a valid data row (col 0 contains '/')
+            if (!cols[0] || !cols[0].includes('/')) continue;
+            
+            let dateStr = cols[0].replace(/["']/g, '').trim();
+
+            // Try to parse DD/MM/YYYY
+            const dateParts = dateStr.split('/');
+            if (dateParts.length === 3) {
+               const day = dateParts[0].padStart(2, '0');
+               const month = dateParts[1].padStart(2, '0');
+               const year = dateParts[2];
+               dateStr = `${year}-${month}-${day}`;
+            } else {
+               const parsedDate = new Date(dateStr);
+               if (!isNaN(parsedDate.getTime())) {
+                 dateStr = parsedDate.toISOString().split('T')[0];
+               } else {
+                 continue; // Invalid date format
+               }
+            }
+            
+            const amountThb = cleanNum(cols[1]);
+            const satoshisRaw = cleanNum(cols[2]);
+            const btcAcquired = satoshisRaw / 100000000;
+            const priceThb = cleanNum(cols[3]);
+            
+            if (amountThb <= 0) continue;
+            
+            importedRecords.push({
+              id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
+              date: dateStr,
+              amount: amountThb,
+              price: priceThb,
+              sat: satoshisRaw,
+              currency: 'THB'
+            });
+            addedCount++;
+          }
+
+          if (importedRecords.length === 0) {
+             throw new Error('ไม่พบข้อมูลที่จะนำเข้าในไฟล์ CSV หรืออาจเป็นเพราะรูปแบบตัวเลขไม่ถูกต้อง');
+          }
+
+          if (confirm(`พบข้อมูลจำนวน ${addedCount} รายการ คุณต้องการนำเข้าและรวมกับข้อมูลปัจจุบันหรือไม่?`)) {
+            // Add to state and save
+            state.records = [...state.records, ...importedRecords];
+            // Sort records by date descending
+            state.records.sort((a, b) => new Date(b.date) - new Date(a.date));
+            
+            saveStateToStorage();
+            renderUi();
+            
+            if (typeof elSettingsModal !== 'undefined') {
+              elSettingsModal.classList.remove('active');
+            }
+            
+            alert(`นำเข้าประวัติจำนวน ${addedCount} รายการสำเร็จ!`);
+          }
+
+        } catch (err) {
+          alert('เกิดข้อผิดพลาดในการนำเข้า CSV: ' + err.message);
+        }
+      };
+      reader.readAsText(file);
+      // Clear value to allow re-importing
+      elImportCsvInput.value = '';
+    });
+  }
 
   // Clear all portfolio data
   elClearAllDataBtn.addEventListener('click', () => {
