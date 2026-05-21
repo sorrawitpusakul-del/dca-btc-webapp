@@ -672,12 +672,10 @@ input:focus {
   border-radius: var(--radius-lg);
   width: 100%;
   max-width: 500px;
-  max-height: 90vh;
-  overflow-y: auto;
-  overflow-x: hidden;
   box-shadow: 0 25px 50px rgba(0, 0, 0, 0.6);
   transform: scale(0.95);
   transition: var(--transition);
+  overflow: hidden;
 }
 
 .modal-overlay.active .modal-card {
@@ -690,10 +688,6 @@ input:focus {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  position: sticky;
-  top: 0;
-  background-color: var(--bg-card);
-  z-index: 10;
 }
 
 .modal-header h3 {
@@ -1231,8 +1225,8 @@ input:focus {
   font-weight: 700;
   letter-spacing: -0.01em;
   outline: none;
-  width: 100%;
-  max-width: 250px;
+  width: 250px;
+  max-width: 100%;
   box-shadow: 0 0 10px var(--primary-glow);
 }
 
@@ -1416,100 +1410,6 @@ body.theme-pitch-black .apexcharts-xaxistooltip {
   padding: 4px 10px;
   border-radius: 20px;
   border: 1px solid var(--border-light);
-}
-
-/* ----------------------------------------------------
-   MOBILE RESPONSIVE DESIGN TWEAKS
-   ---------------------------------------------------- */
-@media (max-width: 768px) {
-  .app-container {
-    padding: 1rem 0.75rem;
-  }
-  
-  .app-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 1rem;
-  }
-  
-  .header-actions {
-    width: 100%;
-    flex-wrap: wrap;
-    justify-content: flex-start;
-  }
-  
-  .logo-text h1 {
-    font-size: 1.1rem;
-  }
-  
-  .glass-card {
-    padding: 1rem;
-  }
-
-  .goal-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0.5rem;
-  }
-
-  .goal-col.align-right {
-    align-items: flex-start;
-  }
-
-  .goal-value {
-    font-size: 1.35rem;
-  }
-
-  .satoshi-card {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 1rem;
-  }
-  
-  .satoshi-value {
-    font-size: 1.5rem;
-  }
-
-  .stat-value {
-    font-size: 1.25rem;
-  }
-  
-  .form-title {
-    font-size: 1rem;
-  }
-  
-  .chart-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0.5rem;
-  }
-  
-  .chart-actions {
-    flex-wrap: wrap;
-  }
-  
-  .modal-body {
-    padding: 1rem;
-  }
-
-  .share-actions-grid {
-    grid-template-columns: 1fr;
-  }
-}
-
-@media (max-width: 480px) {
-  .logo-container {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-  .live-price-group {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0.2rem;
-  }
-  .price-separator {
-    display: none;
-  }
 }
 
 
