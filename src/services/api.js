@@ -57,13 +57,22 @@ export async function fetchLiveBtcPrice() {
  * Fetch the latest USD/THB exchange rate with backups.
  * @returns {Promise<number>} Exchange rate
  */
-export async function fetchExchangeRateThb() {
+export async function fetchExchangeRates() {
+  const defaultRates = { USD: 1.0, THB: DEFAULT_USD_TO_THB, AUD: 1.55, JPY: 155.0 };
+
   // Try primary Exchange Rate API
   try {
     const response = await fetch(EXCHANGE_RATE_URL);
     if (response.ok) {
       const data = await response.json();
-      if (data.rates && data.rates.THB) return parseFloat(data.rates.THB);
+      if (data.rates) {
+        return {
+          USD: 1.0,
+          THB: parseFloat(data.rates.THB) || DEFAULT_USD_TO_THB,
+          AUD: parseFloat(data.rates.AUD) || 1.55,
+          JPY: parseFloat(data.rates.JPY) || 155.0
+        };
+      }
     }
   } catch (e) {
     console.warn('Primary exchange rate fetch failed, trying backup API:', e);
@@ -74,7 +83,14 @@ export async function fetchExchangeRateThb() {
     const response = await fetch('https://api.exchangerate-api.com/v4/latest/USD');
     if (response.ok) {
       const data = await response.json();
-      if (data.rates && data.rates.THB) return parseFloat(data.rates.THB);
+      if (data.rates) {
+        return {
+          USD: 1.0,
+          THB: parseFloat(data.rates.THB) || DEFAULT_USD_TO_THB,
+          AUD: parseFloat(data.rates.AUD) || 1.55,
+          JPY: parseFloat(data.rates.JPY) || 155.0
+        };
+      }
     }
   } catch (e) {
     console.warn('Second exchange rate backup failed, trying third API:', e);
@@ -85,26 +101,31 @@ export async function fetchExchangeRateThb() {
     const response = await fetch('https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/usd.json');
     if (response.ok) {
       const data = await response.json();
-      if (data && data.usd && data.usd.thb) {
-        return parseFloat(data.usd.thb);
+      if (data && data.usd) {
+        return {
+          USD: 1.0,
+          THB: parseFloat(data.usd.thb) || DEFAULT_USD_TO_THB,
+          AUD: parseFloat(data.usd.aud) || 1.55,
+          JPY: parseFloat(data.usd.jpy) || 155.0
+        };
       }
     }
   } catch (e) {
     console.warn('All exchange rate backups failed, using default fallback:', e);
   }
 
-  return DEFAULT_USD_TO_THB;
+  return defaultRates;
 }
 
 /**
  * Fetch live data in parallel.
- * @returns {Promise<{ btcPriceUsd: number|null, usdToThb: number }>}
+ * @returns {Promise<{ btcPriceUsd: number|null, rates: object }>}
  */
 export async function fetchLiveData() {
-  const [btcPriceUsd, usdToThb] = await Promise.all([
+  const [btcPriceUsd, rates] = await Promise.all([
     fetchLiveBtcPrice(),
-    fetchExchangeRateThb()
+    fetchExchangeRates()
   ]);
 
-  return { btcPriceUsd, usdToThb };
+  return { btcPriceUsd, rates };
 }

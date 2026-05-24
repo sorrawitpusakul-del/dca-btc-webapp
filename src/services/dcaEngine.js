@@ -13,7 +13,7 @@ const SATOSHI_PER_BTC = 100000000;
  * @param {number} usdToThb - Exchange rate
  * @returns {object} Calculated stats for display
  */
-export function calculatePortfolioStats(records, livePriceTarget, targetCurrency = 'THB', usdToThb = 36.5) {
+export function calculatePortfolioStats(records, btcPriceUsd, targetCurrency = 'THB', rates = { USD: 1.0, THB: 36.5, AUD: 1.55, JPY: 155.0 }) {
   if (!records || records.length === 0) {
     return {
       totalInvested: 0,
@@ -31,17 +31,13 @@ export function calculatePortfolioStats(records, livePriceTarget, targetCurrency
 
   records.forEach(item => {
     const origCurrency = item.currency || 'THB';
-    let amt = parseFloat(item.amount) || 0;
+    const amt = parseFloat(item.amount) || 0;
 
-    if (origCurrency !== targetCurrency) {
-      if (targetCurrency === 'USD') {
-        amt = amt / usdToThb;
-      } else {
-        amt = amt * usdToThb;
-      }
-    }
+    // Convert from original logged currency to targetCurrency via USD
+    const amtInUsd = amt / (rates[origCurrency] || 1.0);
+    const amtInTarget = amtInUsd * (rates[targetCurrency] || 1.0);
 
-    totalInvested += amt;
+    totalInvested += amtInTarget;
     totalSatoshi += parseInt(item.sat) || 0;
   });
 
@@ -49,6 +45,7 @@ export function calculatePortfolioStats(records, livePriceTarget, targetCurrency
   const averagePrice = totalBtc > 0 ? totalInvested / totalBtc : 0;
   
   // Current portfolio valuation in the target currency
+  const livePriceTarget = btcPriceUsd * (rates[targetCurrency] || 1.0);
   const currentValue = totalBtc * livePriceTarget;
   const profitLoss = currentValue - totalInvested;
   const profitLossPercent = totalInvested > 0 ? (profitLoss / totalInvested) * 100 : 0;
@@ -68,11 +65,11 @@ export function calculatePortfolioStats(records, livePriceTarget, targetCurrency
  * Compiles a chronological timeline of portfolio growth.
  * 
  * @param {Array} records - Array of transaction items
- * @param {string} targetCurrency - 'THB' | 'USD'
- * @param {number} usdToThb - Exchange rate
+ * @param {string} targetCurrency - Active target currency ('THB' | 'USD' | 'AUD' | 'JPY')
+ * @param {object} rates - Rates object relative to USD
  * @returns {Array} Timeline of daily stats { date, principal, value }
  */
-export function generateChartData(records, targetCurrency = 'THB', usdToThb = 36.5) {
+export function generateChartData(records, targetCurrency = 'THB', rates = { USD: 1.0, THB: 36.5, AUD: 1.55, JPY: 155.0 }) {
   if (!records || records.length === 0) return [];
 
   // Sort records chronologically (oldest first)
@@ -84,25 +81,21 @@ export function generateChartData(records, targetCurrency = 'THB', usdToThb = 36
 
   sorted.forEach(item => {
     const origCurrency = item.currency || 'THB';
-    let amt = parseFloat(item.amount) || 0;
-    let price = parseFloat(item.price) || 0;
+    const amt = parseFloat(item.amount) || 0;
+    const price = parseFloat(item.price) || 0;
 
-    // Convert amount and price to target currency
-    if (origCurrency !== targetCurrency) {
-      if (targetCurrency === 'USD') {
-        amt = amt / usdToThb;
-        price = price / usdToThb;
-      } else {
-        amt = amt * usdToThb;
-        price = price * usdToThb;
-      }
-    }
+    // Convert amount and price to target currency via USD
+    const amtInUsd = amt / (rates[origCurrency] || 1.0);
+    const amtInTarget = amtInUsd * (rates[targetCurrency] || 1.0);
+    
+    const priceInUsd = price / (rates[origCurrency] || 1.0);
+    const priceInTarget = priceInUsd * (rates[targetCurrency] || 1.0);
 
-    cumulativePrincipal += amt;
+    cumulativePrincipal += amtInTarget;
     cumulativeSatoshi += parseInt(item.sat) || 0;
 
     const cumulativeBtc = cumulativeSatoshi / SATOSHI_PER_BTC;
-    const portfolioValue = cumulativeBtc * price;
+    const portfolioValue = cumulativeBtc * priceInTarget;
 
     dailyPoints[item.date] = {
       date: item.date,

@@ -24,21 +24,41 @@ if ('serviceWorker' in navigator && import.meta.env.PROD) {
 let state = {
   records: [],
   targetBtc: 1.0,
-  livePriceThb: 2500000,
-  livePriceUsd: 75000,
-  usdToThb: 36.5,
+  btcPriceUsd: 75000,
+  rates: {
+    USD: 1.0,
+    THB: 36.5,
+    AUD: 1.55,
+    JPY: 155.0
+  },
   displayCurrency: 'THB',
   privacyMode: false,
   portfolioName: 'BTC DCA Portfolio',
   activeTheme: 'dark' // 'dark' (classic space blue-black) or 'pitch-black' (premium AMOLED)
 };
 
+// Currency Symbols Mapping
+const CURRENCY_SYMBOLS = {
+  THB: '฿',
+  USD: '$',
+  AUD: 'A$',
+  JPY: '¥'
+};
+
+// Flags Mapping
+const CURRENCY_FLAGS = {
+  THB: '🇹🇭',
+  USD: '🇺🇸',
+  AUD: '🇦🇺',
+  JPY: '🇯🇵'
+};
+
 // ApexCharts Instance
 let chartInstance = null;
 
 // DOM Elements
-const elLiveBtcThb = document.getElementById('live-btc-thb');
-const elLiveBtcUsd = document.getElementById('live-btc-usd');
+const elLiveBtcPrimary = document.getElementById('live-btc-primary');
+const elLiveBtcSecondary = document.getElementById('live-btc-secondary');
 const elToggleVisibilityBtn = document.getElementById('toggle-visibility-btn');
 const elEyeIcon = document.getElementById('eye-icon');
 const elSettingsTriggerBtn = document.getElementById('settings-trigger-btn');
@@ -172,7 +192,7 @@ function loadStateFromStorage() {
   state.privacyMode = savedPrivacy === 'true';
 
   const savedCurrency = localStorage.getItem('dca_portfolio_currency');
-  if (savedCurrency === 'USD' || savedCurrency === 'THB') {
+  if (savedCurrency && CURRENCY_SYMBOLS[savedCurrency]) {
     state.displayCurrency = savedCurrency;
   }
 
@@ -207,31 +227,49 @@ function loadStateFromStorage() {
     elSharePortfolioTitle.value = state.portfolioName;
   }
 
-  // Update active toggle pill indicator immediately on load
-  const elCurrencyThbBtn = document.getElementById('currency-thb-btn');
-  const elCurrencyUsdBtn = document.getElementById('currency-usd-btn');
-  if (elCurrencyThbBtn && elCurrencyUsdBtn) {
-    if (state.displayCurrency === 'USD') {
-      elCurrencyUsdBtn.classList.add('active');
-      elCurrencyThbBtn.classList.remove('active');
-    } else {
-      elCurrencyThbBtn.classList.add('active');
-      elCurrencyUsdBtn.classList.remove('active');
-    }
-  }
+  // Update active dropdown elements
+  updateDropdownUiState();
 
   // Apply privacy state immediately
   updatePrivacyView();
 }
 
 /**
- * Format numbers as THB or USD currency text.
+ * Update dropdown UI trigger button text, icon, and menu items active state.
+ */
+function updateDropdownUiState() {
+  const trigger = document.getElementById('currency-dropdown-trigger');
+  if (trigger) {
+    const flag = CURRENCY_FLAGS[state.displayCurrency] || '🇹🇭';
+    const flagSpan = trigger.querySelector('.flag-icon');
+    const codeSpan = trigger.querySelector('.currency-code');
+    if (flagSpan) flagSpan.textContent = flag;
+    if (codeSpan) codeSpan.textContent = state.displayCurrency;
+  }
+
+  // Update menu items
+  const menuItems = document.querySelectorAll('#currency-dropdown-menu .dropdown-item');
+  menuItems.forEach(item => {
+    const val = item.dataset.value;
+    if (val === state.displayCurrency) {
+      item.classList.add('active');
+      item.setAttribute('aria-selected', 'true');
+    } else {
+      item.classList.remove('active');
+      item.setAttribute('aria-selected', 'false');
+    }
+  });
+}
+
+/**
+ * Format numbers as dynamic currency text with appropriate decimal digits.
  */
 function formatCurrency(value, currency = state.displayCurrency) {
-  const symbol = currency === 'USD' ? '$' : '฿';
+  const symbol = CURRENCY_SYMBOLS[currency] || '$';
+  const decimals = currency === 'JPY' ? 0 : 2;
   return symbol + parseFloat(value).toLocaleString('en-US', {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2
+    minimumFractionDigits: decimals,
+    maximumFractionDigits: decimals
   });
 }
 
@@ -276,18 +314,21 @@ function updatePrivacyView() {
  */
 async function loadMarketPrices() {
   try {
-    const { btcPriceUsd, usdToThb } = await fetchLiveData();
-    if (btcPriceUsd && usdToThb) {
-      state.livePriceUsd = btcPriceUsd;
-      state.livePriceThb = btcPriceUsd * usdToThb;
-      state.usdToThb = usdToThb;
+    const { btcPriceUsd, rates } = await fetchLiveData();
+    if (btcPriceUsd && rates) {
+      state.btcPriceUsd = btcPriceUsd;
+      state.rates = rates;
       
-      // Update displays
-      elLiveBtcThb.innerText = formatCurrency(state.livePriceThb, 'THB');
-      elLiveBtcUsd.innerText = '$' + btcPriceUsd.toLocaleString('en-US', { minimumFractionDigits: 2 });
+      // Update primary and secondary displays
+      const primaryPrice = btcPriceUsd * (rates[state.displayCurrency] || 1.0);
+      elLiveBtcPrimary.innerText = formatCurrency(primaryPrice, state.displayCurrency);
+
+      const secondaryCurrency = state.displayCurrency === 'USD' ? 'THB' : 'USD';
+      const secondaryPrice = btcPriceUsd * (rates[secondaryCurrency] || 1.0);
+      elLiveBtcSecondary.innerText = formatCurrency(secondaryPrice, secondaryCurrency);
       
       // If adding new, pre-fill form purchase price with live price based on current display currency
-      const livePricePrefill = state.displayCurrency === 'USD' ? state.livePriceUsd : state.livePriceThb;
+      const livePricePrefill = btcPriceUsd * (rates[state.displayCurrency] || 1.0);
       if (!elInputPrice.value || elInputPrice.dataset.isPreFilled === 'true') {
         elInputPrice.value = Math.round(livePricePrefill);
         elInputPrice.dataset.isPreFilled = 'true';
@@ -320,8 +361,8 @@ function updateSatoshiCalculation() {
  * Render complete Dashboard calculations.
  */
 function renderUi() {
-  const livePriceTarget = state.displayCurrency === 'USD' ? state.livePriceUsd : state.livePriceThb;
-  const stats = calculatePortfolioStats(state.records, livePriceTarget, state.displayCurrency, state.usdToThb);
+  const stats = calculatePortfolioStats(state.records, state.btcPriceUsd, state.displayCurrency, state.rates);
+  const livePriceTarget = state.btcPriceUsd * (state.rates[state.displayCurrency] || 1.0);
 
   // 1. Goal Progress
   elAccumulatedBtcDisplay.innerText = displayVal(stats.totalBtc, 'btc');
@@ -383,18 +424,8 @@ function renderUi() {
     
     // Convert record currency to active displayCurrency on the fly
     const origCurrency = r.currency || 'THB';
-    let displayAmt = parseFloat(r.amount);
-    let displayPrice = parseFloat(r.price);
-    
-    if (origCurrency !== state.displayCurrency) {
-      if (state.displayCurrency === 'USD') {
-        displayAmt = displayAmt / state.usdToThb;
-        displayPrice = displayPrice / state.usdToThb;
-      } else {
-        displayAmt = displayAmt * state.usdToThb;
-        displayPrice = displayPrice * state.usdToThb;
-      }
-    }
+    const displayAmt = (parseFloat(r.amount) / (state.rates[origCurrency] || 1.0)) * (state.rates[state.displayCurrency] || 1.0);
+    const displayPrice = (parseFloat(r.price) / (state.rates[origCurrency] || 1.0)) * (state.rates[state.displayCurrency] || 1.0);
 
     // Calculate dynamic profit/loss for this specific entry row
     const currentEntryVal = btcVal * livePriceTarget;
@@ -478,14 +509,14 @@ function addTransaction(e) {
   elInputSat.value = '';
   setDefaultDate();
   
-  const livePricePrefill = state.displayCurrency === 'USD' ? state.livePriceUsd : state.livePriceThb;
+  const livePricePrefill = state.btcPriceUsd * (state.rates[state.displayCurrency] || 1.0);
   elInputPrice.value = Math.round(livePricePrefill);
   
   renderUi();
 }
 
 /**
- * Handle switching display currency (USD / THB)
+ * Handle switching display currency (THB, USD, AUD, JPY)
  */
 function switchDisplayCurrency(targetCurrency) {
   if (state.displayCurrency === targetCurrency) return;
@@ -493,18 +524,8 @@ function switchDisplayCurrency(targetCurrency) {
   state.displayCurrency = targetCurrency;
   saveStateToStorage();
   
-  // Update currency toggle button UI states
-  const elCurrencyThbBtn = document.getElementById('currency-thb-btn');
-  const elCurrencyUsdBtn = document.getElementById('currency-usd-btn');
-  if (elCurrencyThbBtn && elCurrencyUsdBtn) {
-    if (targetCurrency === 'USD') {
-      elCurrencyUsdBtn.classList.add('active');
-      elCurrencyThbBtn.classList.remove('active');
-    } else {
-      elCurrencyThbBtn.classList.add('active');
-      elCurrencyUsdBtn.classList.remove('active');
-    }
-  }
+  // Update dropdown triggers and list items active state
+  updateDropdownUiState();
   
   // Update input labels & pre-filled purchase price
   updateFormLabelsAndPrefills();
@@ -521,28 +542,25 @@ function updateFormLabelsAndPrefills() {
   const elThAmount = document.querySelector('.ledger-table th:nth-child(2)');
   const elThPrice = document.querySelector('.ledger-table th:nth-child(3)');
   
-  const livePricePrefill = state.displayCurrency === 'USD' ? state.livePriceUsd : state.livePriceThb;
+  const livePricePrefill = state.btcPriceUsd * (state.rates[state.displayCurrency] || 1.0);
 
-  if (state.displayCurrency === 'USD') {
-    if (elLabelAmount) elLabelAmount.innerText = 'จำนวนเงิน (USD)';
-    if (elLabelPrice) elLabelPrice.innerText = 'ราคาที่ซื้อ (USD/BTC)';
-    if (elThAmount) elThAmount.innerText = 'จำนวนเงิน (USD)';
-    if (elThPrice) elThPrice.innerText = 'ราคาซื้อ (USD/BTC)';
-    
-    if (elInputPrice.dataset.isPreFilled === 'true' || !elInputPrice.value) {
-      elInputPrice.value = Math.round(livePricePrefill);
-      elInputPrice.dataset.isPreFilled = 'true';
-    }
-  } else {
-    if (elLabelAmount) elLabelAmount.innerText = 'จำนวนเงิน (บาท)';
-    if (elLabelPrice) elLabelPrice.innerText = 'ราคาที่ซื้อ (บาท/BTC)';
-    if (elThAmount) elThAmount.innerText = 'จำนวนเงิน (บาท)';
-    if (elThPrice) elThPrice.innerText = 'ราคาซื้อ (บาท/BTC)';
-    
-    if (elInputPrice.dataset.isPreFilled === 'true' || !elInputPrice.value) {
-      elInputPrice.value = Math.round(livePricePrefill);
-      elInputPrice.dataset.isPreFilled = 'true';
-    }
+  const localizedNames = {
+    THB: 'บาท (THB)',
+    USD: 'ดอลลาร์ (USD)',
+    AUD: 'ดอลลาร์ออสเตรเลีย (AUD)',
+    JPY: 'เยน (JPY)'
+  };
+
+  const name = localizedNames[state.displayCurrency] || state.displayCurrency;
+
+  if (elLabelAmount) elLabelAmount.innerText = `จำนวนเงิน (${name})`;
+  if (elLabelPrice) elLabelPrice.innerText = `ราคาที่ซื้อ (${state.displayCurrency}/BTC)`;
+  if (elThAmount) elThAmount.innerText = `จำนวนเงิน (${state.displayCurrency})`;
+  if (elThPrice) elThPrice.innerText = `ราคาซื้อ (${state.displayCurrency}/BTC)`;
+  
+  if (elInputPrice.dataset.isPreFilled === 'true' || !elInputPrice.value) {
+    elInputPrice.value = Math.round(livePricePrefill);
+    elInputPrice.dataset.isPreFilled = 'true';
   }
   
   updateSatoshiCalculation();
@@ -570,7 +588,7 @@ function renderChart() {
   }
 
   // Compile growth data points from engine
-  const timelineData = generateChartData(state.records, state.displayCurrency, state.usdToThb);
+  const timelineData = generateChartData(state.records, state.displayCurrency, state.rates);
 
   const dates = timelineData.map(d => formatThaiDate(d.date));
   const principalSeries = timelineData.map(d => d.principal);
@@ -581,14 +599,13 @@ function renderChart() {
   const lastPoint = timelineData[timelineData.length - 1];
   
   if (lastPoint && lastPoint.date !== todayStr) {
-    const livePriceTarget = state.displayCurrency === 'USD' ? state.livePriceUsd : state.livePriceThb;
-    const stats = calculatePortfolioStats(state.records, livePriceTarget, state.displayCurrency, state.usdToThb);
+    const stats = calculatePortfolioStats(state.records, state.btcPriceUsd, state.displayCurrency, state.rates);
     dates.push('ปัจจุบัน');
     principalSeries.push(parseFloat(stats.totalInvested.toFixed(2)));
     valueSeries.push(parseFloat(stats.currentValue.toFixed(2)));
   }
 
-  const currencySymbol = state.displayCurrency === 'USD' ? '$' : '฿';
+  const currencySymbol = CURRENCY_SYMBOLS[state.displayCurrency] || '$';
 
   const options = {
     series: [
@@ -1221,8 +1238,7 @@ function updateShareCardCanvas() {
   ctx.textBaseline = 'alphabetic';
 
   // 5. Portfolio Title & Details
-  const livePriceTarget = state.displayCurrency === 'USD' ? state.livePriceUsd : state.livePriceThb;
-  const stats = calculatePortfolioStats(state.records, livePriceTarget, state.displayCurrency, state.usdToThb);
+  const stats = calculatePortfolioStats(state.records, state.btcPriceUsd, state.displayCurrency, state.rates);
 
   const portTitleEl = document.getElementById('share-portfolio-title');
   const portTitleText = (portTitleEl ? portTitleEl.value.trim() : 'MY BITCOIN DCA') || 'MY BITCOIN DCA';
@@ -1589,12 +1605,8 @@ async function initApp() {
     elToggleThemeBtn.addEventListener('click', toggleThemeMode);
   }
   
-  const elCurrencyThbBtn = document.getElementById('currency-thb-btn');
-  const elCurrencyUsdBtn = document.getElementById('currency-usd-btn');
-  if (elCurrencyThbBtn && elCurrencyUsdBtn) {
-    elCurrencyThbBtn.addEventListener('click', () => switchDisplayCurrency('THB'));
-    elCurrencyUsdBtn.addEventListener('click', () => switchDisplayCurrency('USD'));
-  }
+  // Initialize Custom Currency Dropdown
+  initCurrencyDropdown();
   
   initSettingsModal();
   initShareModal();
@@ -1607,6 +1619,99 @@ async function initApp() {
   // Load real-time market rates and schedule auto-refresh every 30s
   await loadMarketPrices();
   setInterval(loadMarketPrices, 30000);
+}
+
+/**
+ * Initializes the premium custom currency dropdown element, toggling logic, click-outside-to-close, and keyboard access.
+ */
+function initCurrencyDropdown() {
+  const container = document.getElementById('currency-dropdown');
+  const trigger = document.getElementById('currency-dropdown-trigger');
+  const menuItems = document.querySelectorAll('#currency-dropdown-menu .dropdown-item');
+
+  if (!container || !trigger) return;
+
+  // Toggle active class on trigger click
+  trigger.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const isOpen = container.classList.contains('active');
+    
+    // Close other modals if open
+    document.querySelectorAll('.modal-overlay').forEach(el => el.classList.remove('active'));
+    
+    if (isOpen) {
+      container.classList.remove('active');
+      trigger.setAttribute('aria-expanded', 'false');
+    } else {
+      container.classList.add('active');
+      trigger.setAttribute('aria-expanded', 'true');
+    }
+  });
+
+  // Handle option selection
+  menuItems.forEach((item, index) => {
+    item.addEventListener('click', () => {
+      const val = item.dataset.value;
+      switchDisplayCurrency(val);
+      container.classList.remove('active');
+      trigger.setAttribute('aria-expanded', 'false');
+      trigger.focus();
+    });
+
+    // Keyboard support inside options
+    item.setAttribute('tabindex', '0'); // Allow keyboard focus on li options
+    item.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        const val = item.dataset.value;
+        switchDisplayCurrency(val);
+        container.classList.remove('active');
+        trigger.setAttribute('aria-expanded', 'false');
+        trigger.focus();
+      } else if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        const next = menuItems[(index + 1) % menuItems.length];
+        if (next) next.focus();
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        const prev = menuItems[(index - 1 + menuItems.length) % menuItems.length];
+        if (prev) prev.focus();
+      } else if (e.key === 'Escape') {
+        e.preventDefault();
+        container.classList.remove('active');
+        trigger.setAttribute('aria-expanded', 'false');
+        trigger.focus();
+      }
+    });
+  });
+
+  // Keyboard support on the trigger button
+  trigger.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowDown' || e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      container.classList.add('active');
+      trigger.setAttribute('aria-expanded', 'true');
+      const activeItem = container.querySelector('.dropdown-item.active');
+      if (activeItem) {
+        activeItem.focus();
+      } else {
+        const first = menuItems[0];
+        if (first) first.focus();
+      }
+    } else if (e.key === 'Escape') {
+      e.preventDefault();
+      container.classList.remove('active');
+      trigger.setAttribute('aria-expanded', 'false');
+    }
+  });
+
+  // Click outside to close
+  document.addEventListener('click', (e) => {
+    if (!container.contains(e.target)) {
+      container.classList.remove('active');
+      trigger.setAttribute('aria-expanded', 'false');
+    }
+  });
 }
 
 // Bind to window DOM loading

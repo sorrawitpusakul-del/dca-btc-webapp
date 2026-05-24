@@ -39,19 +39,46 @@
             </div>
             <div class="live-price-group">
               <span class="live-pulse-dot"></span>
-              <span id="live-btc-thb" class="live-price-thb">฿0.00</span>
+              <span id="live-btc-primary" class="live-price-thb">฿0.00</span>
               <span class="price-separator">|</span>
-              <span id="live-btc-usd" class="live-price-usd">$0.00</span>
+              <span id="live-btc-secondary" class="live-price-usd">$0.00</span>
             </div>
           </div>
         </div>
         
         <!-- Header Action Controls -->
         <div class="header-actions">
-          <!-- Currency Toggle Switch -->
-          <div class="currency-toggle-wrapper">
-            <button class="currency-btn active" id="currency-thb-btn" title="แสดงผลเป็นเงินบาท (THB)">฿ THB</button>
-            <button class="currency-btn" id="currency-usd-btn" title="แสดงผลเป็นเงินดอลลาร์ (USD)">$ USD</button>
+          <!-- Currency Custom Dropdown -->
+          <div class="currency-dropdown-container" id="currency-dropdown">
+            <button class="dropdown-trigger" id="currency-dropdown-trigger" aria-haspopup="listbox" aria-expanded="false" title="เลือกสกุลเงินแสดงผล">
+              <span class="flag-icon">🇹🇭</span>
+              <span class="currency-code">THB</span>
+              <svg class="chevron-icon" xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="6 9 12 15 18 9"></polyline>
+              </svg>
+            </button>
+            <ul class="dropdown-menu" role="listbox" id="currency-dropdown-menu">
+              <li class="dropdown-item active" data-value="THB" role="option" aria-selected="true">
+                <span class="flag-icon">🇹🇭</span>
+                <span class="currency-code">THB</span>
+                <span class="currency-symbol">฿</span>
+              </li>
+              <li class="dropdown-item" data-value="USD" role="option" aria-selected="false">
+                <span class="flag-icon">🇺🇸</span>
+                <span class="currency-code">USD</span>
+                <span class="currency-symbol">$</span>
+              </li>
+              <li class="dropdown-item" data-value="AUD" role="option" aria-selected="false">
+                <span class="flag-icon">🇦🇺</span>
+                <span class="currency-code">AUD</span>
+                <span class="currency-symbol">A$</span>
+              </li>
+              <li class="dropdown-item" data-value="JPY" role="option" aria-selected="false">
+                <span class="flag-icon">🇯🇵</span>
+                <span class="currency-code">JPY</span>
+                <span class="currency-symbol">¥</span>
+              </li>
+            </ul>
           </div>
 
           <button class="action-btn" id="toggle-visibility-btn" title="ซ่อน/แสดง ยอดเงิน">
