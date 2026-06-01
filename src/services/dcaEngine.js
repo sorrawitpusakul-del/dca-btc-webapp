@@ -119,5 +119,5 @@ export function generateChartData(records, targetCurrency = 'THB', rates = { USD
 export function calculateSatoshis(amount, price) {
   if (amount <= 0 || price <= 0) return 0;
   const btcValue = amount / price;
-  return Math.round(btcValue * SATOSHI_PER_BTC);
+  return Math.floor(btcValue * SATOSHI_PER_BTC);
 }

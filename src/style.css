@@ -843,6 +843,14 @@ input:focus {
   display: flex;
 }
 
+/* Guide Language Container — force stacked column layout */
+.guide-lang-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  width: 100%;
+}
+
 /* Premium DCA Guide Typography and Cards */
 .guide-section {
   display: flex;
@@ -1791,5 +1799,116 @@ body.theme-pitch-black .apexcharts-xaxistooltip {
   }
 }
 
+/* ====================================================
+   PREMIUM EN/TH TOGGLE & HYBRID SATOSHI FIELD STYLES
+   ==================================================== */
+.lang-toggle-btn {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 0.78rem;
+  color: var(--primary);
+  background: rgba(247, 147, 26, 0.08);
+  border: 1px solid rgba(247, 147, 26, 0.25);
+  border-radius: 30px;
+  padding: 0.25rem 0.65rem;
+  width: auto !important;
+  min-width: 42px;
+  height: 36px;
+  box-shadow: 0 0 10px rgba(247, 147, 26, 0.05);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: var(--transition);
+}
 
+.lang-toggle-btn:hover {
+  background: rgba(247, 147, 26, 0.15);
+  border-color: var(--primary);
+  color: var(--primary);
+  box-shadow: 0 0 15px rgba(247, 147, 26, 0.15);
+  transform: translateY(-1px);
+}
+
+/* Pitch Black Overrides for Lang Toggle */
+body.theme-pitch-black .lang-toggle-btn {
+  background: rgba(247, 147, 26, 0.04) !important;
+  border-color: rgba(247, 147, 26, 0.18) !important;
+}
+
+/* Hybrid Satoshi Manual Editing Indicator */
+#input-sat.manual-input {
+  border-color: #ff9e24 !important;
+  box-shadow: 0 0 8px rgba(255, 158, 36, 0.15) !important;
+  background-color: rgba(247, 147, 26, 0.02) !important;
+}
+
+#input-sat.manual-input:focus {
+  box-shadow: 0 0 0 3px rgba(247, 147, 26, 0.3) !important;
+}
+
+/* ====================================================
+   DESKTOP GUIDE / FAQ SECTION POLISH
+   ==================================================== */
+@media (min-width: 768px) {
+  .guide-section {
+    background: rgba(255, 255, 255, 0.015);
+    border: 1px solid rgba(255, 255, 255, 0.04);
+    border-radius: var(--radius-lg);
+    padding: 1.25rem 1.5rem;
+    transition: var(--transition);
+  }
+
+  .guide-section:hover {
+    background: rgba(255, 255, 255, 0.03);
+    border-color: rgba(247, 147, 26, 0.12);
+  }
+
+  .guide-title {
+    font-size: 1rem;
+  }
+
+  .guide-tips-list {
+    gap: 0.85rem;
+  }
+
+  .guide-tip-item {
+    padding: 0.85rem 1rem;
+  }
+
+  .guide-tip-text {
+    font-size: 0.82rem;
+  }
+
+  .guide-steps li {
+    font-size: 0.82rem;
+  }
+
+  .premium-callout-box {
+    padding: 1.15rem 1.25rem;
+  }
+}
+
+/* ====================================================
+   PREMIUM LANGUAGE SELECTION BUTTONS IN SETTINGS
+   ==================================================== */
+.lang-select-btn {
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.lang-select-btn.active {
+  background: rgba(247, 147, 26, 0.12) !important;
+  color: var(--primary) !important;
+  border-color: var(--primary) !important;
+  box-shadow: 0 0 12px rgba(247, 147, 26, 0.25), inset 0 0 8px rgba(247, 147, 26, 0.08) !important;
+  font-weight: 700 !important;
+}
+
+.lang-select-btn.active:hover {
+  background: rgba(247, 147, 26, 0.16) !important;
+  box-shadow: 0 0 16px rgba(247, 147, 26, 0.35) !important;
+}
+
+body.theme-pitch-black .lang-select-btn.active {
+  background: rgba(247, 147, 26, 0.08) !important;
+}
 

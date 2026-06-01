@@ -34,7 +34,10 @@ let state = {
   displayCurrency: 'THB',
   privacyMode: false,
   portfolioName: 'BTC DCA Portfolio',
-  activeTheme: 'dark' // 'dark' (classic space blue-black) or 'pitch-black' (premium AMOLED)
+  activeTheme: 'dark', // 'dark' (classic space blue-black) or 'pitch-black' (premium AMOLED)
+  language: 'TH',
+  isSatManual: false,
+  shareBgImage: null
 };
 
 // Currency Symbols Mapping
@@ -115,6 +118,7 @@ function saveStateToStorage() {
   localStorage.setItem('dca_portfolio_currency', state.displayCurrency);
   localStorage.setItem('dca_portfolio_name', state.portfolioName);
   localStorage.setItem('dca_portfolio_theme', state.activeTheme);
+  localStorage.setItem('dca_portfolio_lang', state.language);
 }
 
 /**
@@ -209,6 +213,13 @@ function loadStateFromStorage() {
   } else {
     state.activeTheme = 'dark';
   }
+
+  const savedLang = localStorage.getItem('dca_portfolio_lang');
+  if (savedLang === 'TH' || savedLang === 'EN') {
+    state.language = savedLang;
+  } else {
+    state.language = 'TH';
+  }
   
   // Apply theme immediately to body
   updateThemeView();
@@ -232,6 +243,201 @@ function loadStateFromStorage() {
 
   // Apply privacy state immediately
   updatePrivacyView();
+}
+
+// ====================================================
+// TRANSLATION DICTIONARY & BILINGUAL LOGIC
+// ====================================================
+const TRANSLATIONS = {
+  TH: {
+    toggle_language: "สลับภาษา / Toggle Language (TH/EN)",
+    toggle_visibility: "ซ่อน/แสดง ยอดเงิน",
+    toggle_theme: "สลับธีม มืดหรูหรา / ดำสนิท (Pitch Black)",
+    share_card_title: "แชร์ภาพการ์ดสรุปพอร์ตโฟลิโอของคุณ",
+    settings_title_hover: "การตั้งค่า & สำรองข้อมูล",
+    accumulated_label: "สะสมแล้ว (BTC)",
+    target_label: "เป้าหมาย (BTC)",
+    current_value_label: "มูลค่าปัจจุบัน",
+    total_cost_label: "ต้นทุนทั้งหมด",
+    profit_loss_label: "กำไร / ขาดทุน",
+    chart_title: "แนวโน้มพอร์ตโฟลิโอสะสม (Portfolio Growth Trend)",
+    chart_legend_value: "มูลค่าพอร์ตสุทธิ",
+    chart_legend_cost: "เงินต้นที่ออมสะสม",
+    satoshi_label: "บิตคอยน์ทั้งหมด (SATOSHI)",
+    form_title: "➕ บันทึกธุรกรรม DCA ใหม่",
+    form_date: "วันที่",
+    form_amount: "จำนวนเงิน",
+    form_price: "ราคาที่ซื้อ",
+    form_sat: "จำนวน Sat",
+    form_sat_calc: "(คำนวณอัตโนมัติ)",
+    form_save_btn: "บันทึกข้อมูล",
+    ledger_title: "ประวัติการบันทึกข้อมูลการซื้อ",
+    table_date: "วันที่",
+    table_amount: "จำนวนเงิน",
+    table_price: "ราคาซื้อ",
+    table_received_btc: "ได้รับ (BTC)",
+    table_received_sat: "ได้รับ (SATOSHI)",
+    table_profit_loss: "กำไร/ขาดทุน",
+    table_manage: "จัดการ",
+    support_title: "สนับสนุนนักพัฒนา (Tip via Lightning)",
+    support_desc: "หากแอปนี้มีประโยชน์ คุณสามารถส่งมอบกำลังใจเล็กๆ น้อยๆ เป็น Satoshi ผ่าน Lightning Network ได้ครับ",
+    settings_title: "การตั้งค่า & ข้อมูลช่วยเหลือ",
+    tab_settings: "⚙️ ตั้งค่าพอร์ต",
+    tab_guide: "💡 คู่มือการออม DCA",
+    setting_name_label: "ชื่อพอร์ตโฟลิโอของคุณ",
+    setting_target_label: "เป้าหมายการสะสม Bitcoin (BTC)",
+    setting_lang_label: "ภาษาของระบบ (Language)",
+    setting_backup_label: "ความปลอดภัยและสำรองข้อมูล",
+    setting_export_btn: "📥 ส่งออกไฟล์สำรองข้อมูล (JSON)",
+    setting_import_json: "📤 นำเข้าไฟล์สำรองข้อมูล (JSON)",
+    setting_import_csv: "📊 นำเข้าจากไฟล์ CSV (Bitkub/Binance)",
+    setting_danger_title: "เขตอันตราย (Danger Zone)",
+    setting_danger_desc: "การล้างข้อมูลจะลบรายการบันทึก DCA ทั้งหมดที่จัดเก็บอยู่ในเบราว์เซอร์นี้อย่างถาวร กรุณาตรวจสอบให้แน่ใจก่อนทำการลบ",
+    setting_danger_btn: "⚠️ ล้างข้อมูลพอร์ตทั้งหมด",
+    share_title: "แชร์พอร์ตโฟลิโอสะสมบิตคอยน์",
+    share_ratio_label: "รูปแบบอัตราส่วนภาพ",
+    share_title_input_label: "ระบุชื่อพอร์ตสำหรับการแชร์",
+    share_settings_label: "การตั้งค่าการ์ดแชร์",
+    share_switch_yield: "แสดงผลตอบแทนรวม (Net Yield)",
+    share_switch_progress: "แสดงเป้าหมายความคืบหน้า (Goal Progress)",
+    share_switch_sats: "แสดงจำนวนสะสมย่อย (SATS)",
+    share_custom_bg: "🖼️ อัปโหลดรูปพื้นหลังเอง",
+    share_choose_img: "เลือกรูปภาพ",
+    share_remove_img: "❌ ลบรูป",
+    share_copy_btn: "📋 คัดลอกรูปภาพ (Copy Image)",
+    share_download_btn: "💾 ดาวน์โหลดรูปภาพ (Download PNG)",
+    share_native_btn: "📲 เปิดเมนูแชร์ของระบบมือถือ (Native Share)",
+    select_currency: "เลือกสกุลเงินแสดงผล"
+  },
+  EN: {
+    toggle_language: "Toggle Language (TH/EN)",
+    toggle_visibility: "Hide/Show Balance",
+    toggle_theme: "Toggle Theme (Deep Slate / Pitch Black)",
+    share_card_title: "Share Portfolio Card",
+    settings_title_hover: "Settings & Backup",
+    accumulated_label: "Accumulated (BTC)",
+    target_label: "Target (BTC)",
+    current_value_label: "Current Value",
+    total_cost_label: "Total Cost",
+    profit_loss_label: "Profit / Loss",
+    chart_title: "Portfolio Growth Trend",
+    chart_legend_value: "Net Portfolio Value",
+    chart_legend_cost: "Total Invested Capital",
+    satoshi_label: "Total Bitcoin (SATOSHI)",
+    form_title: "➕ Log New DCA Transaction",
+    form_date: "Date",
+    form_amount: "Amount",
+    form_price: "Purchase Price",
+    form_sat: "Sats Quantity",
+    form_sat_calc: "(Auto Calculated)",
+    form_save_btn: "Save Transaction",
+    ledger_title: "Purchase Ledger History",
+    table_date: "Date",
+    table_amount: "Amount",
+    table_price: "Purchase Price",
+    table_received_btc: "Received (BTC)",
+    table_received_sat: "Received (SATOSHI)",
+    table_profit_loss: "Profit/Loss",
+    table_manage: "Action",
+    support_title: "Support the Developer (Tip via Lightning)",
+    support_desc: "If this webapp is useful, you can show your support by sending a few Satoshis via the Lightning Network.",
+    settings_title: "Settings & Information Guide",
+    tab_settings: "⚙️ Portfolio Settings",
+    tab_guide: "💡 DCA Guide",
+    setting_name_label: "Your Portfolio Name",
+    setting_target_label: "Bitcoin Accumulation Target (BTC)",
+    setting_lang_label: "App Language (Language)",
+    setting_backup_label: "Security & Data Backup",
+    setting_export_btn: "📥 Export Backup File (JSON)",
+    setting_import_json: "📤 Import Backup File (JSON)",
+    setting_import_csv: "📊 Import from CSV (Bitkub/Binance)",
+    setting_danger_title: "Danger Zone",
+    setting_danger_desc: "Clearing data will permanently delete all logged DCA transactions stored in this browser. Please make sure before executing.",
+    setting_danger_btn: "⚠️ Reset & Clear All Data",
+    share_title: "Share Bitcoin Portfolio Card",
+    share_ratio_label: "Card Aspect Ratio",
+    share_title_input_label: "Set Portfolio Share Title",
+    share_settings_label: "Share Card Options",
+    share_switch_yield: "Show Total Yield (Net %)",
+    share_switch_progress: "Show Accumulation Goal Progress",
+    share_switch_sats: "Show Satoshis Quantity (SATS)",
+    share_custom_bg: "🖼️ Upload Custom Background",
+    share_choose_img: "Choose Image",
+    share_remove_img: "❌ Remove Image",
+    share_copy_btn: "📋 Copy Card Image",
+    share_download_btn: "💾 Download PNG Image",
+    share_native_btn: "📲 Open Mobile System Share",
+    select_currency: "Select Display Currency"
+  }
+};
+
+function applyLanguage(lang) {
+  state.language = lang;
+  saveStateToStorage();
+  
+  const btnTh = document.getElementById('lang-btn-th');
+  const btnEn = document.getElementById('lang-btn-en');
+  if (btnTh && btnEn) {
+    if (lang === 'TH') {
+      btnTh.classList.add('active');
+      btnEn.classList.remove('active');
+    } else {
+      btnEn.classList.add('active');
+      btnTh.classList.remove('active');
+    }
+  }
+  
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.getAttribute('data-i18n');
+    if (TRANSLATIONS[lang] && TRANSLATIONS[lang][key]) {
+      if (key === 'form_title') {
+        el.innerHTML = `<span class="plus-icon">+</span> ${TRANSLATIONS[lang][key].replace('➕ ', '')}`;
+      } else {
+        el.textContent = TRANSLATIONS[lang][key];
+      }
+    }
+  });
+
+  document.querySelectorAll('[data-i18n-title]').forEach(el => {
+    const key = el.getAttribute('data-i18n-title');
+    if (TRANSLATIONS[lang] && TRANSLATIONS[lang][key]) {
+      el.setAttribute('title', TRANSLATIONS[lang][key]);
+    }
+  });
+
+  const elGuideTh = document.getElementById('guide-lang-th');
+  const elGuideEn = document.getElementById('guide-lang-en');
+  if (elGuideTh && elGuideEn) {
+    if (lang === 'TH') {
+      elGuideTh.style.display = 'flex';
+      elGuideEn.style.display = 'none';
+    } else {
+      elGuideTh.style.display = 'none';
+      elGuideEn.style.display = 'flex';
+    }
+  }
+
+  const elInputAmount = document.getElementById('input-amount');
+  const elInputPrice = document.getElementById('input-price');
+  if (elInputAmount) {
+    elInputAmount.placeholder = lang === 'EN' ? 'Enter amount...' : 'ระบุจำนวนเงิน...';
+  }
+  if (elInputPrice) {
+    elInputPrice.placeholder = lang === 'EN' ? 'Enter purchase price...' : 'ระบุราคาที่ซื้อ...';
+  }
+
+  const elSettingPortfolioName = document.getElementById('setting-portfolio-name');
+  if (elSettingPortfolioName) {
+    elSettingPortfolioName.placeholder = lang === 'EN' ? 'My Bitcoin DCA...' : 'พอร์ตออมบิตคอยน์ของฉัน...';
+  }
+
+  updateFormLabelsAndPrefills();
+  renderUi();
+  
+  const elShareModal = document.getElementById('share-modal');
+  if (elShareModal && elShareModal.classList.contains('active')) {
+    updateShareCardCanvas();
+  }
 }
 
 /**
@@ -346,12 +552,14 @@ async function loadMarketPrices() {
  * Auto-calculate satoshis as user types in form.
  */
 function updateSatoshiCalculation() {
+  if (state.isSatManual) return; // Skip auto-fill if user has manually edited satoshi value!
+  
   const amount = parseFloat(elInputAmount.value) || 0;
   const price = parseFloat(elInputPrice.value) || 0;
   
   if (amount > 0 && price > 0) {
     const satoshis = calculateSatoshis(amount, price);
-    elInputSat.value = satoshis.toLocaleString('en-US') + ' Sat';
+    elInputSat.value = satoshis; // Simple numeric string so type="number" accepts it!
   } else {
     elInputSat.value = '';
   }
@@ -374,17 +582,21 @@ function renderUi() {
 
   const remaining = state.targetBtc - stats.totalBtc;
   if (remaining > 0) {
-    elRemainingBtcDisplay.innerText = `เหลืออีก: ${displayVal(remaining, 'btc')} BTC`;
+    elRemainingBtcDisplay.innerText = state.language === 'EN'
+      ? `Remaining: ${displayVal(remaining, 'btc')} BTC`
+      : `เหลืออีก: ${displayVal(remaining, 'btc')} BTC`;
   } else {
-    elRemainingBtcDisplay.innerText = 'สะสมได้ครบเป้าหมายแล้ว! 🎉';
+    elRemainingBtcDisplay.innerText = state.language === 'EN'
+      ? 'Target Achieved! 🎉'
+      : 'สะสมได้ครบเป้าหมายแล้ว! 🎉';
   }
 
   // 2. Stats Row Cards
   elCurrentValueDisplay.innerText = displayVal(stats.currentValue);
-  elRefPriceDisplay.innerText = `อ้างอิง: ${formatCurrency(livePriceTarget)}`;
+  elRefPriceDisplay.innerText = `${state.language === 'EN' ? 'Ref' : 'อ้างอิง'}: ${formatCurrency(livePriceTarget)}`;
   
   elTotalCostDisplay.innerText = displayVal(stats.totalInvested);
-  elAvgPriceDisplay.innerText = `เฉลี่ย: ${formatCurrency(stats.averagePrice)}`;
+  elAvgPriceDisplay.innerText = `${state.language === 'EN' ? 'Avg' : 'เฉลี่ย'}: ${formatCurrency(stats.averagePrice)}`;
   
   const sign = stats.profitLoss >= 0 ? '+' : '';
   elProfitLossDisplay.innerText = `${sign}${displayVal(stats.profitLoss)}`;
@@ -490,7 +702,12 @@ function addTransaction(e) {
   
   if (amount <= 0 || price <= 0) return;
 
-  const satValue = calculateSatoshis(amount, price);
+  let satValue;
+  if (state.isSatManual && elInputSat.value) {
+    satValue = parseFloat(elInputSat.value);
+  } else {
+    satValue = calculateSatoshis(amount, price);
+  }
 
   const newRecord = {
     id: Date.now().toString(),
@@ -503,6 +720,10 @@ function addTransaction(e) {
 
   state.records.push(newRecord);
   saveStateToStorage();
+  
+  // Reset manual flags
+  state.isSatManual = false;
+  elInputSat.classList.remove('manual-input');
   
   // Reset input amount, auto pre-fill date to today and price to active live price
   elInputAmount.value = '';
@@ -544,19 +765,40 @@ function updateFormLabelsAndPrefills() {
   
   const livePricePrefill = state.btcPriceUsd * (state.rates[state.displayCurrency] || 1.0);
 
-  const localizedNames = {
+  const localizedNamesEN = {
+    THB: 'Baht (THB)',
+    USD: 'Dollars (USD)',
+    AUD: 'Australian Dollars (AUD)',
+    JPY: 'Yen (JPY)'
+  };
+
+  const localizedNamesTH = {
     THB: 'บาท (THB)',
     USD: 'ดอลลาร์ (USD)',
     AUD: 'ดอลลาร์ออสเตรเลีย (AUD)',
     JPY: 'เยน (JPY)'
   };
 
+  const isEn = state.language === 'EN';
+  const localizedNames = isEn ? localizedNamesEN : localizedNamesTH;
   const name = localizedNames[state.displayCurrency] || state.displayCurrency;
 
-  if (elLabelAmount) elLabelAmount.innerText = `จำนวนเงิน (${name})`;
-  if (elLabelPrice) elLabelPrice.innerText = `ราคาที่ซื้อ (${state.displayCurrency}/BTC)`;
-  if (elThAmount) elThAmount.innerText = `จำนวนเงิน (${state.displayCurrency})`;
-  if (elThPrice) elThPrice.innerText = `ราคาซื้อ (${state.displayCurrency}/BTC)`;
+  if (elLabelAmount) {
+    elLabelAmount.innerText = isEn ? `Amount (${name})` : `จำนวนเงิน (${name})`;
+  }
+  if (elLabelPrice) {
+    elLabelPrice.innerText = isEn 
+      ? `Purchase Price (${state.displayCurrency}/BTC)`
+      : `ราคาที่ซื้อ (${state.displayCurrency}/BTC)`;
+  }
+  if (elThAmount) {
+    elThAmount.innerText = isEn ? `Amount (${state.displayCurrency})` : `จำนวนเงิน (${state.displayCurrency})`;
+  }
+  if (elThPrice) {
+    elThPrice.innerText = isEn 
+      ? `Purchase Price (${state.displayCurrency}/BTC)`
+      : `ราคาซื้อ (${state.displayCurrency}/BTC)`;
+  }
   
   if (elInputPrice.dataset.isPreFilled === 'true' || !elInputPrice.value) {
     elInputPrice.value = Math.round(livePricePrefill);
@@ -577,7 +819,7 @@ function renderChart() {
   if (state.records.length === 0) {
     chartEl.innerHTML = `
       <div style="display: flex; align-items: center; justify-content: center; height: 250px; color: var(--text-muted); font-size: 0.9rem; font-weight: 500;">
-        เพิ่มบันทึกรายการซื้อรายการแรกเพื่อเริ่มต้นแสดงแนวโน้มพอร์ต!
+        ${state.language === 'EN' ? 'Add your first DCA transaction to see the portfolio trend!' : 'เพิ่มบันทึกรายการซื้อรายการแรกเพื่อเริ่มต้นแสดงแนวโน้มพอร์ต!'}
       </div>
     `;
     if (chartInstance) {
@@ -600,7 +842,7 @@ function renderChart() {
   
   if (lastPoint && lastPoint.date !== todayStr) {
     const stats = calculatePortfolioStats(state.records, state.btcPriceUsd, state.displayCurrency, state.rates);
-    dates.push('ปัจจุบัน');
+    dates.push(state.language === 'EN' ? 'Today' : 'ปัจจุบัน');
     principalSeries.push(parseFloat(stats.totalInvested.toFixed(2)));
     valueSeries.push(parseFloat(stats.currentValue.toFixed(2)));
   }
@@ -610,11 +852,11 @@ function renderChart() {
   const options = {
     series: [
       {
-        name: 'มูลค่าพอร์ตสุทธิ',
+        name: state.language === 'EN' ? 'Net Portfolio Value' : 'มูลค่าพอร์ตสุทธิ',
         data: valueSeries
       },
       {
-        name: 'เงินต้นที่ออมสะสม',
+        name: state.language === 'EN' ? 'Total Invested' : 'เงินต้นที่ออมสะสม',
         data: principalSeries
       }
     ],
@@ -865,6 +1107,18 @@ function initSettingsModal() {
     renderUi();
   });
 
+  // Language button clicks in settings
+  const btnTh = document.getElementById('lang-btn-th');
+  const btnEn = document.getElementById('lang-btn-en');
+  if (btnTh && btnEn) {
+    btnTh.addEventListener('click', () => {
+      applyLanguage('TH');
+    });
+    btnEn.addEventListener('click', () => {
+      applyLanguage('EN');
+    });
+  }
+
   // Export Backups (JSON File Download)
   elExportBackupBtn.addEventListener('click', () => {
     const backupData = {
@@ -1106,21 +1360,46 @@ function updateShareCardCanvas() {
   canvas.width = width;
   canvas.height = height;
 
-  // 1. Gradient Background (Dynamic based on Theme)
-  const grad = ctx.createLinearGradient(0, 0, width, height);
-  if (state.activeTheme === 'pitch-black') {
-    // Premium AMOLED Pitch Black Background
-    grad.addColorStop(0, '#000000');
-    grad.addColorStop(0.5, '#040404');
-    grad.addColorStop(1, '#000000');
+  // 1. Background drawing (Image cover or Gradient Theme)
+  if (state.shareBgImage) {
+    const imgW = state.shareBgImage.width;
+    const imgH = state.shareBgImage.height;
+    const canvasRatio = width / height;
+    const imgRatio = imgW / imgH;
+    
+    let sx, sy, sWidth, sHeight;
+    
+    if (imgRatio > canvasRatio) {
+      sHeight = imgH;
+      sWidth = imgH * canvasRatio;
+      sx = (imgW - sWidth) / 2;
+      sy = 0;
+    } else {
+      sWidth = imgW;
+      sHeight = imgW / canvasRatio;
+      sx = 0;
+      sy = (imgH - sHeight) / 2;
+    }
+    
+    ctx.drawImage(state.shareBgImage, sx, sy, sWidth, sHeight, 0, 0, width, height);
+    
+    // Mask film overlay to ensure readability
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.65)';
+    ctx.fillRect(0, 0, width, height);
   } else {
-    // Deep Space Dark (classic space blue-black)
-    grad.addColorStop(0, '#0d111d');
-    grad.addColorStop(0.5, '#090c15');
-    grad.addColorStop(1, '#05060b');
+    const grad = ctx.createLinearGradient(0, 0, width, height);
+    if (state.activeTheme === 'pitch-black') {
+      grad.addColorStop(0, '#000000');
+      grad.addColorStop(0.5, '#040404');
+      grad.addColorStop(1, '#000000');
+    } else {
+      grad.addColorStop(0, '#0d111d');
+      grad.addColorStop(0.5, '#090c15');
+      grad.addColorStop(1, '#05060b');
+    }
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, width, height);
   }
-  ctx.fillStyle = grad;
-  ctx.fillRect(0, 0, width, height);
 
   // 2. Glowing background lights
   // Orange glow top right
@@ -1278,7 +1557,7 @@ function updateShareCardCanvas() {
     // Pill label
     ctx.fillStyle = '#8e96a4';
     ctx.font = '600 18px Outfit, Inter, sans-serif';
-    ctx.fillText('ผลตอบแทนสุทธิ (NET YIELD)', width / 2, pillY - 18);
+    ctx.fillText(state.language === 'EN' ? 'TOTAL NET YIELD' : 'ผลตอบแทนสุทธิ (NET YIELD)', width / 2, pillY - 18);
 
     // Pill body
     if (state.activeTheme === 'pitch-black') {
@@ -1302,7 +1581,7 @@ function updateShareCardCanvas() {
     if (!state.privacyMode) {
       ctx.fillStyle = '#8e96a4';
       ctx.font = '600 18px Outfit, Inter, sans-serif';
-      ctx.fillText(`มูลค่าพอร์ต: ${formatCurrency(stats.currentValue)}  (ทุน: ${formatCurrency(stats.totalInvested)})`, width / 2, pillY + 115);
+      ctx.fillText(state.language === 'EN' ? `Portfolio Value: ${formatCurrency(stats.currentValue)}  (Cost: ${formatCurrency(stats.totalInvested)})` : `มูลค่าพอร์ต: ${formatCurrency(stats.currentValue)}  (ทุน: ${formatCurrency(stats.totalInvested)})`, width / 2, pillY + 115);
     }
   }
 
@@ -1317,7 +1596,7 @@ function updateShareCardCanvas() {
     ctx.textAlign = 'left';
     ctx.fillStyle = '#8e96a4';
     ctx.font = '600 18px Outfit, Inter, sans-serif';
-    ctx.fillText('สะสมสู่เป้าหมาย (BTC GOAL)', barX, barY - 15);
+    ctx.fillText(state.language === 'EN' ? 'ACCUMULATION GOAL (BTC)' : 'สะสมสู่เป้าหมาย (BTC GOAL)', barX, barY - 15);
 
     // Progress Percentage
     const progressPercent = state.targetBtc > 0 ? (stats.totalBtc / state.targetBtc) * 100 : 0;
@@ -1361,7 +1640,7 @@ function updateShareCardCanvas() {
 
   ctx.font = '500 14px Outfit, Inter, sans-serif';
   ctx.fillStyle = '#3a4250';
-  ctx.fillText('CREATE YOUR SECURE CLIENT-SIDE DCA DIARY', width / 2, waterY + 25);
+  ctx.fillText(state.language === 'EN' ? 'CREATE YOUR SECURE CLIENT-SIDE DCA DIARY' : 'สร้างบันทึกบัญชี DCA ออฟไลน์ที่ปลอดภัยด้วยตัวเอง', width / 2, waterY + 25);
 
   // 9. Output to responsive preview image
   const previewImg = document.getElementById('share-preview-image');
@@ -1387,10 +1666,24 @@ function initShareModal() {
 
   if (!elShareTriggerBtn || !elShareModal) return;
 
+  const elCustomBgTrigger = document.getElementById('custom-bg-trigger-btn');
+  const elCustomBgRemove = document.getElementById('custom-bg-remove-btn');
+  const elShareBgInput = document.getElementById('share-bg-input');
+
   // Open Share Modal
   elShareTriggerBtn.addEventListener('click', () => {
     elShareModal.classList.add('active');
-    updateShareCardCanvas();
+    if (elCustomBgRemove) {
+      elCustomBgRemove.style.display = state.shareBgImage ? 'inline-block' : 'none';
+    }
+    // Re-check fonts ready when opening modal to fix initial alignment shift
+    if (document.fonts) {
+      document.fonts.ready.then(() => {
+        updateShareCardCanvas();
+      });
+    } else {
+      updateShareCardCanvas();
+    }
   });
 
   // Close Share Modal
@@ -1403,6 +1696,39 @@ function initShareModal() {
       elShareModal.classList.remove('active');
     }
   });
+
+  // Background Custom Image Upload Toggles
+  if (elCustomBgTrigger && elShareBgInput) {
+    elCustomBgTrigger.addEventListener('click', () => {
+      elShareBgInput.click();
+    });
+
+    elShareBgInput.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          const img = new Image();
+          img.onload = () => {
+            state.shareBgImage = img;
+            if (elCustomBgRemove) elCustomBgRemove.style.display = 'inline-block';
+            updateShareCardCanvas();
+          };
+          img.src = event.target.result;
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+  }
+
+  if (elCustomBgRemove) {
+    elCustomBgRemove.addEventListener('click', () => {
+      state.shareBgImage = null;
+      if (elShareBgInput) elShareBgInput.value = '';
+      elCustomBgRemove.style.display = 'none';
+      updateShareCardCanvas();
+    });
+  }
 
   // Switch Ratios
   if (elRatioSquareBtn && elRatioStoryBtn) {
@@ -1448,25 +1774,62 @@ function initShareModal() {
     });
   }
 
-  // Action: Copy to Clipboard (Image blob)
+  // Action: Copy to Clipboard (Image blob) — with mobile fallback
   if (elCopyBtn) {
-    elCopyBtn.addEventListener('click', () => {
+    elCopyBtn.addEventListener('click', async () => {
       const canvas = document.getElementById('share-canvas');
       if (!canvas) return;
 
-      canvas.toBlob(blob => {
-        if (blob) {
-          try {
-            navigator.clipboard.write([
-              new ClipboardItem({ 'image/png': blob })
-            ]);
-            alert('คัดลอกรูปภาพไปยังคลิปบอร์ดสำเร็จแล้ว! สามารถกด Ctrl+V หรือคลิกขวาเพื่อวางโพสต์ได้ทันที');
-          } catch (err) {
-            console.warn('Modern Clipboard API copy failed, trying alternative:', err);
-            alert('ไม่สามารถคัดลอกรูปภาพโดยตรงผ่านเว็บบราวเซอร์เวอร์ชันนี้ได้ กรุณาใช้ปุ่มดาวน์โหลดรูปภาพแทนนะครับ');
+      const isMobile = /Android|iPhone|iPad|iPod|webOS|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
+                     || ('ontouchstart' in window);
+
+      try {
+        const blob = await new Promise((resolve) => canvas.toBlob(resolve, 'image/png'));
+        if (!blob) return;
+
+        // Desktop: use Clipboard API directly
+        if (!isMobile && navigator.clipboard && typeof ClipboardItem !== 'undefined') {
+          await navigator.clipboard.write([
+            new ClipboardItem({ 'image/png': blob })
+          ]);
+          const msg = state.lang === 'TH'
+            ? 'คัดลอกรูปภาพไปยังคลิปบอร์ดสำเร็จแล้ว! สามารถกด Ctrl+V หรือคลิกขวาเพื่อวางโพสต์ได้ทันที'
+            : 'Image copied to clipboard! Press Ctrl+V or right-click to paste.';
+          alert(msg);
+          return;
+        }
+
+        // Mobile: try Web Share API (best experience on phones)
+        if (navigator.canShare) {
+          const file = new File([blob], 'btc-dca-share.png', { type: 'image/png' });
+          const shareData = { files: [file] };
+          if (navigator.canShare(shareData)) {
+            await navigator.share(shareData);
+            return;
           }
         }
-      }, 'image/png');
+
+        // Fallback: trigger download
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.download = `btc-dca-share-${new Date().toISOString().split('T')[0]}.png`;
+        link.href = url;
+        link.click();
+        setTimeout(() => URL.revokeObjectURL(url), 3000);
+        const dlMsg = state.lang === 'TH'
+          ? 'เบราว์เซอร์นี้ไม่รองรับคัดลอกรูปภาพโดยตรง ระบบดาวน์โหลดรูปภาพให้แล้วครับ'
+          : 'This browser does not support direct image copy. The image has been downloaded instead.';
+        alert(dlMsg);
+      } catch (err) {
+        console.warn('Copy/share failed:', err);
+        // Don't alert on user-cancelled share
+        if (err.name !== 'AbortError') {
+          const errMsg = state.lang === 'TH'
+            ? 'ไม่สามารถคัดลอกรูปภาพได้ กรุณาใช้ปุ่มดาวน์โหลดรูปภาพแทนนะครับ'
+            : 'Could not copy image. Please use the download button instead.';
+          alert(errMsg);
+        }
+      }
     });
   }
 
@@ -1594,6 +1957,19 @@ async function initApp() {
     updateSatoshiCalculation();
   });
 
+  // Hybrid Satoshi Manual Entry listener
+  elInputSat.addEventListener('input', () => {
+    const val = elInputSat.value.trim();
+    if (val === '') {
+      state.isSatManual = false;
+      elInputSat.classList.remove('manual-input');
+      updateSatoshiCalculation();
+    } else {
+      state.isSatManual = true;
+      elInputSat.classList.add('manual-input');
+    }
+  });
+
   // Form submission
   elDcaForm.addEventListener('submit', addTransaction);
 
@@ -1612,9 +1988,18 @@ async function initApp() {
   initShareModal();
   initInlineTitleEditor();
 
-  // Render initial localStorage values
-  renderUi();
-  updateFormLabelsAndPrefills();
+  // Load language from storage/default and translate/render UI
+  applyLanguage(state.language);
+
+  // Redraw Canvas when Google Web Fonts are ready to guarantee centering
+  if (document.fonts) {
+    document.fonts.ready.then(() => {
+      const elShareModal = document.getElementById('share-modal');
+      if (elShareModal && elShareModal.classList.contains('active')) {
+        updateShareCardCanvas();
+      }
+    });
+  }
 
   // Load real-time market rates and schedule auto-refresh every 30s
   await loadMarketPrices();
