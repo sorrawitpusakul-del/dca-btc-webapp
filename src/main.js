@@ -1554,7 +1554,8 @@ function updateShareCardCanvas() {
     const pillX = (width - pillW) / 2;
     const pillY = startY;
 
-    // Pill label
+    // Pill label — explicitly ensure center alignment for mobile compatibility
+    ctx.textAlign = 'center';
     ctx.fillStyle = '#8e96a4';
     ctx.font = '600 18px Outfit, Inter, sans-serif';
     ctx.fillText(state.language === 'EN' ? 'TOTAL NET YIELD' : 'ผลตอบแทนสุทธิ (NET YIELD)', width / 2, pillY - 18);
@@ -1572,13 +1573,15 @@ function updateShareCardCanvas() {
     ctx.fill();
     ctx.stroke();
 
-    // Yield Value text
+    // Yield Value text — explicitly ensure center alignment
+    ctx.textAlign = 'center';
     ctx.fillStyle = plColor;
     ctx.font = '800 36px Outfit, Inter, sans-serif';
     ctx.fillText(plPercentText, width / 2, pillY + 46);
 
     // Total investment & current value details if privacy is off
     if (!state.privacyMode) {
+      ctx.textAlign = 'center';
       ctx.fillStyle = '#8e96a4';
       ctx.font = '600 18px Outfit, Inter, sans-serif';
       ctx.fillText(state.language === 'EN' ? `Portfolio Value: ${formatCurrency(stats.currentValue)}  (Cost: ${formatCurrency(stats.totalInvested)})` : `มูลค่าพอร์ต: ${formatCurrency(stats.currentValue)}  (ทุน: ${formatCurrency(stats.totalInvested)})`, width / 2, pillY + 115);
@@ -1592,18 +1595,19 @@ function updateShareCardCanvas() {
     const barH = 18;
     const barX = (width - barW) / 2;
 
-    // Progress Bar Title
-    ctx.textAlign = 'left';
+    // Progress Bar Title (centered)
+    const progressPercent = state.targetBtc > 0 ? (stats.totalBtc / state.targetBtc) * 100 : 0;
+    
+    ctx.textAlign = 'center';
     ctx.fillStyle = '#8e96a4';
     ctx.font = '600 18px Outfit, Inter, sans-serif';
-    ctx.fillText(state.language === 'EN' ? 'ACCUMULATION GOAL (BTC)' : 'สะสมสู่เป้าหมาย (BTC GOAL)', barX, barY - 15);
-
-    // Progress Percentage
-    const progressPercent = state.targetBtc > 0 ? (stats.totalBtc / state.targetBtc) * 100 : 0;
-    ctx.textAlign = 'right';
+    ctx.fillText(state.language === 'EN' ? 'ACCUMULATION GOAL (BTC)' : 'สะสมสู่เป้าหมาย (BTC GOAL)', width / 2, barY - 32);
+    
+    // Progress Percentage (centered, below title)
+    ctx.textAlign = 'center';
     ctx.fillStyle = '#f7931a';
-    ctx.font = '700 20px Outfit, Inter, sans-serif';
-    ctx.fillText(progressPercent.toFixed(2) + '%', barX + barW, barY - 15);
+    ctx.font = '700 22px Outfit, Inter, sans-serif';
+    ctx.fillText(progressPercent.toFixed(2) + '%', width / 2, barY - 10);
 
     // Draw background track
     ctx.fillStyle = state.activeTheme === 'pitch-black' ? 'rgba(255, 255, 255, 0.03)' : 'rgba(255, 255, 255, 0.05)';
@@ -1622,25 +1626,8 @@ function updateShareCardCanvas() {
     }
   }
 
-  // 8. Footer Watermark
-  ctx.textAlign = 'center'; // Explicitly restore center alignment
-  const waterY = isSquare ? height - 70 : height - 120;
-
-  // Subtle separator line
-  ctx.strokeStyle = 'rgba(255, 255, 255, 0.04)';
-  ctx.lineWidth = 1;
-  ctx.beginPath();
-  ctx.moveTo(width * 0.2, waterY - 40);
-  ctx.lineTo(width * 0.8, waterY - 40);
-  ctx.stroke();
-
-  ctx.fillStyle = '#535d6e';
-  ctx.font = '700 18px Outfit, Inter, sans-serif';
-  ctx.fillText('฿ BTC DCA PORTFOLIO TRACKER', width / 2, waterY);
-
-  ctx.font = '500 14px Outfit, Inter, sans-serif';
-  ctx.fillStyle = '#3a4250';
-  ctx.fillText(state.language === 'EN' ? 'CREATE YOUR SECURE CLIENT-SIDE DCA DIARY' : 'สร้างบันทึกบัญชี DCA ออฟไลน์ที่ปลอดภัยด้วยตัวเอง', width / 2, waterY + 25);
+  // 8. Restore center alignment for any future additions
+  ctx.textAlign = 'center';
 
   // 9. Output to responsive preview image
   const previewImg = document.getElementById('share-preview-image');
