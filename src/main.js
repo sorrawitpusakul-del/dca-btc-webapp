@@ -79,6 +79,7 @@ const elProgressPercentBadge = document.getElementById('progress-percent-badge')
 const elCurrentValueDisplay = document.getElementById('current-value-display');
 const elRefPriceDisplay = document.getElementById('ref-price-display');
 const elTotalCostDisplay = document.getElementById('total-cost-display');
+const elTotalTransactionsDisplay = document.getElementById('total-transactions-display');
 const elAvgPriceDisplay = document.getElementById('avg-price-display');
 const elProfitLossDisplay = document.getElementById('profit-loss-display');
 const elProfitLossPercent = document.getElementById('profit-loss-percent');
@@ -259,6 +260,8 @@ const TRANSLATIONS = {
     target_label: "เป้าหมาย (BTC)",
     current_value_label: "มูลค่าปัจจุบัน",
     total_cost_label: "ต้นทุนทั้งหมด",
+    average_price_label: "ราคาต้นทุนเฉลี่ย",
+    avg_price_sub: "ต่อ 1 BTC",
     profit_loss_label: "กำไร / ขาดทุน",
     chart_title: "แนวโน้มพอร์ตโฟลิโอสะสม (Portfolio Growth Trend)",
     chart_legend_value: "มูลค่าพอร์ตสุทธิ",
@@ -319,6 +322,8 @@ const TRANSLATIONS = {
     target_label: "Target (BTC)",
     current_value_label: "Current Value",
     total_cost_label: "Total Cost",
+    average_price_label: "Average Cost Price",
+    avg_price_sub: "per 1 BTC",
     profit_loss_label: "Profit / Loss",
     chart_title: "Portfolio Growth Trend",
     chart_legend_value: "Net Portfolio Value",
@@ -596,7 +601,15 @@ function renderUi() {
   elRefPriceDisplay.innerText = `${state.language === 'EN' ? 'Ref' : 'อ้างอิง'}: ${formatCurrency(livePriceTarget)}`;
   
   elTotalCostDisplay.innerText = displayVal(stats.totalInvested);
-  elAvgPriceDisplay.innerText = `${state.language === 'EN' ? 'Avg' : 'เฉลี่ย'}: ${formatCurrency(stats.averagePrice)}`;
+  
+  const txCount = state.records.length;
+  if (state.privacyMode) {
+    elTotalTransactionsDisplay.innerText = state.language === 'EN' ? 'Transactions: •••' : 'จำนวนธุรกรรม: ••• ครั้ง';
+  } else {
+    elTotalTransactionsDisplay.innerText = state.language === 'EN' ? `Transactions: ${txCount}` : `จำนวนธุรกรรม: ${txCount} ครั้ง`;
+  }
+  
+  elAvgPriceDisplay.innerText = displayVal(stats.averagePrice);
   
   const sign = stats.profitLoss >= 0 ? '+' : '';
   elProfitLossDisplay.innerText = `${sign}${displayVal(stats.profitLoss)}`;
@@ -1585,6 +1598,9 @@ function updateShareCardCanvas() {
       ctx.fillStyle = '#8e96a4';
       ctx.font = '600 18px Outfit, Inter, sans-serif';
       ctx.fillText(state.language === 'EN' ? `Portfolio Value: ${formatCurrency(stats.currentValue)}  (Cost: ${formatCurrency(stats.totalInvested)})` : `มูลค่าพอร์ต: ${formatCurrency(stats.currentValue)}  (ทุน: ${formatCurrency(stats.totalInvested)})`, width / 2, pillY + 115);
+      
+      // Average Cost
+      ctx.fillText(state.language === 'EN' ? `Avg Cost: ${formatCurrency(stats.averagePrice)} / BTC` : `ต้นทุนเฉลี่ย: ${formatCurrency(stats.averagePrice)} / BTC`, width / 2, pillY + 145);
     }
   }
 
