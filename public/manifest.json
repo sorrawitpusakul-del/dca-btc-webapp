@@ -4,7 +4,7 @@
   "description": "เว็บบันทึกข้อมูลการออมแบบ Dollar-Cost Averaging ในบิตคอยน์ส่วนตัวของคุณ ปลอดภัย 100% Client-Side",
   "icons": [
     {
-      "src": "/favicon.svg",
+      "src": "/dca-btc-icon.svg",
       "sizes": "any",
       "type": "image/svg+xml",
       "purpose": "any maskable"

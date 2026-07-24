@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+  <defs>
+    <radialGradient id="bg" cx="35%" cy="30%" r="80%">
+      <stop offset="0%" stop-color="#1a1f2b"/>
+      <stop offset="100%" stop-color="#06070a"/>
+    </radialGradient>
+    <linearGradient id="gold" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#F7931A"/>
+      <stop offset="100%" stop-color="#FFD27D"/>
+    </linearGradient>
+    <linearGradient id="ring" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#F7C267" stop-opacity="0.55"/>
+      <stop offset="100%" stop-color="#F7931A" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+
+  <!-- background -->
+  <circle cx="100" cy="100" r="96" fill="url(#bg)"/>
+  <circle cx="100" cy="100" r="95.5" fill="none" stroke="url(#ring)" stroke-width="1"/>
+
+  <!-- DCA staircase bars -->
+  <g>
+    <rect x="55" y="110" width="14" height="30" rx="3" fill="url(#gold)" opacity="0.55"/>
+    <rect x="79" y="95"  width="14" height="45" rx="3" fill="url(#gold)" opacity="0.72"/>
+    <rect x="103" y="80" width="14" height="60" rx="3" fill="url(#gold)" opacity="0.86"/>
+    <rect x="127" y="60" width="14" height="80" rx="3" fill="url(#gold)"/>
+  </g>
+
+  <!-- trend line -->
+  <polyline points="62,104 86,89 110,74 136,52" fill="none" stroke="#FFE3B0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity="0.55"/>
+
+  <!-- coin with B mark -->
+  <circle cx="139" cy="46" r="19" fill="url(#gold)"/>
+  <circle cx="139" cy="46" r="19" fill="none" stroke="#06070a" stroke-width="1" opacity="0.15"/>
+  <path d="M133 36.5 V55.5 M137 36.5 V55.5"
+        stroke="#1a1207" stroke-width="1.6" stroke-linecap="round"/>
+  <path d="M132.5 37.5 H141 C144.5 37.5 146.5 39.3 146.5 41.8 C146.5 44.3 144.5 45.7 141.5 45.7 H132.5
+           M132.5 45.7 H142 C145.7 45.7 147.7 47.4 147.7 50 C147.7 52.7 145.7 54.5 142 54.5 H132.5"
+        fill="none" stroke="#1a1207" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M136 33 V37.5 M139 33 V37.5 M136 54.5 V59 M139 54.5 V59"
+        stroke="#1a1207" stroke-width="1.6" stroke-linecap="round"/>
+</svg>
