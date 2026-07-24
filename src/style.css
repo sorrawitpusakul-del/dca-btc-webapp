@@ -394,6 +394,107 @@ body {
   border-color: rgba(255, 23, 68, 0.2);
 }
 
+/* Chart Card Header & Lock Toggle */
+.chart-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.chart-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.chart-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.chart-legend-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.chart-legend-dot.val-dot {
+  background-color: var(--primary);
+}
+
+.chart-legend-dot.cost-dot {
+  background-color: var(--text-secondary);
+}
+
+.chart-legend-text {
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.chart-lock-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 20px;
+  padding: 0.25rem 0.65rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  user-select: none;
+  margin-left: 0.5rem;
+}
+
+.chart-lock-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--text-primary);
+  border-color: rgba(247, 147, 26, 0.3);
+}
+
+.chart-lock-btn.locked {
+  background: rgba(247, 147, 26, 0.12);
+  border-color: rgba(247, 147, 26, 0.3);
+  color: var(--primary);
+}
+
+.chart-lock-btn .lock-icon {
+  font-size: 0.85rem;
+  line-height: 1;
+}
+
+/* Touch-Lock Behavior: When chart is locked, touches pass through for smooth scrolling */
+.chart-locked #portfolio-growth-chart,
+.chart-locked #portfolio-growth-chart svg,
+.chart-locked #portfolio-growth-chart .apexcharts-canvas,
+.chart-locked #portfolio-growth-chart .apexcharts-inner {
+  pointer-events: none !important;
+  user-select: none !important;
+  touch-action: auto !important;
+}
+
+@media (max-width: 640px) {
+  .chart-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+  
+  .chart-actions {
+    width: 100%;
+    justify-content: space-between;
+  }
+}
+
 /* Satoshi showcase card */
 .satoshi-card {
   display: flex;

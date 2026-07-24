@@ -37,7 +37,8 @@ let state = {
   activeTheme: 'dark', // 'dark' (classic space blue-black) or 'pitch-black' (premium AMOLED)
   language: 'TH',
   isSatManual: false,
-  shareBgImage: null
+  shareBgImage: null,
+  chartLocked: true
 };
 
 // Currency Symbols Mapping
@@ -222,6 +223,14 @@ function loadStateFromStorage() {
     state.language = 'TH';
   }
   
+  const savedChartLocked = localStorage.getItem('dca_chart_locked');
+  if (savedChartLocked !== null) {
+    state.chartLocked = savedChartLocked === 'true';
+  } else {
+    const isMobile = window.innerWidth <= 768 || ('ontouchstart' in window);
+    state.chartLocked = isMobile;
+  }
+  
   // Apply theme immediately to body
   updateThemeView();
   
@@ -266,6 +275,9 @@ const TRANSLATIONS = {
     chart_title: "แนวโน้มพอร์ตโฟลิโอสะสม (Portfolio Growth Trend)",
     chart_legend_value: "มูลค่าพอร์ตสุทธิ",
     chart_legend_cost: "เงินต้นที่ออมสะสม",
+    chart_locked_label: "ล็อคสัมผัส",
+    chart_unlocked_label: "ปลดล็อคแล้ว",
+    chart_lock_btn_title: "สลับโหมดล็อคการสัมผัสกราฟ",
     satoshi_label: "บิตคอยน์ทั้งหมด (SATOSHI)",
     form_title: "➕ บันทึกธุรกรรม DCA ใหม่",
     form_date: "วันที่",
@@ -328,6 +340,9 @@ const TRANSLATIONS = {
     chart_title: "Portfolio Growth Trend",
     chart_legend_value: "Net Portfolio Value",
     chart_legend_cost: "Total Invested Capital",
+    chart_locked_label: "Touch Locked",
+    chart_unlocked_label: "Interactive",
+    chart_lock_btn_title: "Toggle chart touch lock",
     satoshi_label: "Total Bitcoin (SATOSHI)",
     form_title: "➕ Log New DCA Transaction",
     form_date: "Date",
@@ -433,9 +448,11 @@ function applyLanguage(lang) {
 
   const elSettingPortfolioName = document.getElementById('setting-portfolio-name');
   if (elSettingPortfolioName) {
+    elSettingPortfolioName.value = state.portfolioName;
     elSettingPortfolioName.placeholder = lang === 'EN' ? 'My Bitcoin DCA...' : 'พอร์ตออมบิตคอยน์ของฉัน...';
   }
 
+  updateChartLockUi();
   updateFormLabelsAndPrefills();
   renderUi();
   
@@ -517,6 +534,40 @@ function updatePrivacyView() {
       <circle cx="12" cy="12" r="3"></circle>
     `;
     elToggleVisibilityBtn.classList.remove('active');
+  }
+}
+
+/**
+ * Toggle chart touch lock state
+ */
+function toggleChartLock() {
+  state.chartLocked = !state.chartLocked;
+  localStorage.setItem('dca_chart_locked', state.chartLocked ? 'true' : 'false');
+  updateChartLockUi();
+}
+
+function updateChartLockUi() {
+  const chartContainer = document.getElementById('chart-card-container');
+  const lockBtn = document.getElementById('chart-touch-lock-btn');
+  const lockIcon = document.getElementById('chart-lock-icon');
+  const lockText = document.getElementById('chart-lock-text');
+
+  if (!lockBtn || !chartContainer) return;
+
+  const isEn = state.language === 'EN';
+
+  if (state.chartLocked) {
+    chartContainer.classList.add('chart-locked');
+    lockBtn.classList.add('locked');
+    if (lockIcon) lockIcon.textContent = '🔒';
+    if (lockText) lockText.textContent = isEn ? TRANSLATIONS.EN.chart_locked_label : TRANSLATIONS.TH.chart_locked_label;
+    lockBtn.setAttribute('title', isEn ? 'Click to unlock chart touch' : 'กดเพื่อปลดล็อคสัมผัสกราฟ');
+  } else {
+    chartContainer.classList.remove('chart-locked');
+    lockBtn.classList.remove('locked');
+    if (lockIcon) lockIcon.textContent = '🔓';
+    if (lockText) lockText.textContent = isEn ? TRANSLATIONS.EN.chart_unlocked_label : TRANSLATIONS.TH.chart_unlocked_label;
+    lockBtn.setAttribute('title', isEn ? 'Click to lock chart touch' : 'กดเพื่อล็อคสัมผัสกราฟ');
   }
 }
 
@@ -1978,6 +2029,11 @@ async function initApp() {
 
   // Bind actions
   elToggleVisibilityBtn.addEventListener('click', togglePrivacyMode);
+  
+  const elChartTouchLockBtn = document.getElementById('chart-touch-lock-btn');
+  if (elChartTouchLockBtn) {
+    elChartTouchLockBtn.addEventListener('click', toggleChartLock);
+  }
   
   const elToggleThemeBtn = document.getElementById('toggle-theme-btn');
   if (elToggleThemeBtn) {

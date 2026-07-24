@@ -171,12 +171,16 @@
         </section>
 
         <!-- Premium Portfolio Trend Chart Card -->
-        <section class="glass-card chart-card">
+        <section class="glass-card chart-card" id="chart-card-container">
           <div class="chart-header">
             <h3 class="chart-title" data-i18n="chart_title">แนวโน้มพอร์ตโฟลิโอสะสม (Portfolio Growth Trend)</h3>
             <div class="chart-actions">
               <span class="chart-legend-dot val-dot"></span> <span class="chart-legend-text" data-i18n="chart_legend_value">มูลค่าพอร์ตสุทธิ</span>
               <span class="chart-legend-dot cost-dot" style="margin-left: 10px;"></span> <span class="chart-legend-text" data-i18n="chart_legend_cost">เงินต้นที่ออมสะสม</span>
+              <button id="chart-touch-lock-btn" class="chart-lock-btn" type="button" aria-label="Toggle chart lock" data-i18n-title="chart_lock_btn_title">
+                <span class="lock-icon" id="chart-lock-icon">🔒</span>
+                <span class="lock-text" id="chart-lock-text" data-i18n="chart_locked_label">ล็อคสัมผัส</span>
+              </button>
             </div>
           </div>
           <div class="chart-wrapper">
