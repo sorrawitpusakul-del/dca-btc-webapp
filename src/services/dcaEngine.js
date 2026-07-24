@@ -13,7 +13,7 @@ const SATOSHI_PER_BTC = 100000000;
  * @param {number} usdToThb - Exchange rate
  * @returns {object} Calculated stats for display
  */
-export function calculatePortfolioStats(records, btcPriceUsd, targetCurrency = 'THB', rates = { USD: 1.0, THB: 36.5, AUD: 1.55, JPY: 155.0 }) {
+export function calculatePortfolioStats(records, btcPriceUsd, targetCurrency = 'THB', rates = { USD: 1.0, THB: 36.5, AUD: 1.55, JPY: 155.0 }, withdrawalRecords = []) {
   if (!records || records.length === 0) {
     return {
       totalInvested: 0,
@@ -22,7 +22,13 @@ export function calculatePortfolioStats(records, btcPriceUsd, targetCurrency = '
       currentValue: 0,
       profitLoss: 0,
       profitLossPercent: 0,
-      totalSatoshi: 0
+      totalSatoshi: 0,
+      coldBtc: 0,
+      coldSatoshi: 0,
+      exchangeBtc: 0,
+      selfCustodyPercent: 0,
+      totalFeeSatoshi: 0,
+      totalFeeInTarget: 0
     };
   }
 
@@ -41,14 +47,41 @@ export function calculatePortfolioStats(records, btcPriceUsd, targetCurrency = '
     totalSatoshi += parseInt(item.sat) || 0;
   });
 
+  // Calculate withdrawal fees and Cold Storage Satoshi total
+  let totalFeeSatoshi = 0;
+  let totalFeeInTarget = 0;
+  let coldSatoshi = 0;
+
+  const livePriceTarget = btcPriceUsd * (rates[targetCurrency] || 1.0);
+
+  if (withdrawalRecords && withdrawalRecords.length > 0) {
+    withdrawalRecords.forEach(item => {
+      const feeSat = parseInt(item.feeSat) || 0;
+      const amtSat = parseInt(item.amountSat) || 0;
+      
+      totalFeeSatoshi += feeSat;
+      coldSatoshi += amtSat;
+
+      // Fee converted to target currency using live BTC price (Sat -> BTC -> Currency)
+      const feeBtc = feeSat / SATOSHI_PER_BTC;
+      totalFeeInTarget += feeBtc * livePriceTarget;
+    });
+  }
+
+  // Include withdrawal fees into total invested cost for accurate all-in cost
+  totalInvested += totalFeeInTarget;
+
   const totalBtc = totalSatoshi / SATOSHI_PER_BTC;
   const averagePrice = totalBtc > 0 ? totalInvested / totalBtc : 0;
   
   // Current portfolio valuation in the target currency
-  const livePriceTarget = btcPriceUsd * (rates[targetCurrency] || 1.0);
   const currentValue = totalBtc * livePriceTarget;
   const profitLoss = currentValue - totalInvested;
   const profitLossPercent = totalInvested > 0 ? (profitLoss / totalInvested) * 100 : 0;
+
+  const coldBtc = coldSatoshi / SATOSHI_PER_BTC;
+  const exchangeBtc = Math.max(0, totalBtc - coldBtc);
+  const selfCustodyPercent = totalBtc > 0 ? Math.min(100, (coldBtc / totalBtc) * 100) : 0;
 
   return {
     totalInvested,
@@ -57,7 +90,13 @@ export function calculatePortfolioStats(records, btcPriceUsd, targetCurrency = '
     currentValue,
     profitLoss,
     profitLossPercent,
-    totalSatoshi
+    totalSatoshi,
+    coldBtc,
+    coldSatoshi,
+    exchangeBtc,
+    selfCustodyPercent,
+    totalFeeSatoshi,
+    totalFeeInTarget
   };
 }
 

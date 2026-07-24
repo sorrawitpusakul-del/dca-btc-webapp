@@ -482,6 +482,168 @@ body {
   touch-action: auto !important;
 }
 
+/* Self-Custody Ratio Showcase Card */
+.custody-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  border-left: 4px solid var(--success);
+  background: linear-gradient(90deg, rgba(20, 25, 38, 0.95) 0%, rgba(0, 230, 118, 0.03) 100%);
+}
+
+.custody-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.custody-title-group {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.custody-label {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.custody-badge {
+  font-size: 0.75rem;
+  font-weight: 800;
+  padding: 0.2rem 0.6rem;
+  border-radius: 20px;
+  background: var(--success-bg);
+  color: var(--success);
+  border: 1px solid rgba(0, 230, 118, 0.25);
+  letter-spacing: 0.03em;
+}
+
+.custody-progress-bar {
+  height: 8px;
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.custody-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #00e676 0%, #69f0ae 100%);
+  border-radius: 10px;
+  transition: width 0.4s ease;
+}
+
+.custody-details {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+  font-weight: 500;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+/* Form Tabs & Ledger Tabs Header */
+.form-tabs-header,
+.ledger-tabs-header {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  padding-bottom: 0.5rem;
+}
+
+.form-tab-btn,
+.ledger-tab-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  font-weight: 600;
+  padding: 0.4rem 0.85rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.form-tab-btn:hover,
+.ledger-tab-btn:hover {
+  color: var(--text-primary);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.form-tab-btn.active,
+.ledger-tab-btn.active {
+  color: var(--primary);
+  background: rgba(247, 147, 26, 0.12);
+  border: 1px solid rgba(247, 147, 26, 0.25);
+}
+
+.custom-select {
+  width: 100%;
+  background: rgba(18, 22, 34, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: var(--text-primary);
+  border-radius: 10px;
+  padding: 0.65rem 0.85rem;
+  font-size: 0.9rem;
+  outline: none;
+}
+
+.custom-select:focus {
+  border-color: var(--primary);
+}
+
+/* Collapsible Section Toggle Button */
+.section-toggle-btn {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  background: transparent;
+  border: none;
+  color: var(--text-primary);
+  font-size: 0.95rem;
+  font-weight: 700;
+  padding: 0.25rem 0;
+  cursor: pointer;
+  user-select: none;
+  transition: color 0.2s ease;
+}
+
+.section-toggle-btn:hover {
+  color: var(--primary);
+}
+
+.section-toggle-title {
+  text-align: left;
+}
+
+.section-toggle-chevron {
+  font-size: 0.7rem;
+  transition: transform 0.3s ease;
+  color: var(--text-secondary);
+}
+
+.section-toggle-chevron.collapsed {
+  transform: rotate(180deg);
+}
+
+.collapsible-content {
+  overflow: hidden;
+  max-height: 2000px;
+  transition: max-height 0.4s ease, opacity 0.3s ease, margin-top 0.3s ease;
+  opacity: 1;
+  margin-top: 0.75rem;
+}
+
+.collapsible-content.collapsed {
+  max-height: 0;
+  opacity: 0;
+  margin-top: 0;
+}
+
 @media (max-width: 640px) {
   .chart-header {
     flex-direction: column;

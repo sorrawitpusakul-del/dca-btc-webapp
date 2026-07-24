@@ -172,19 +172,24 @@
 
         <!-- Premium Portfolio Trend Chart Card -->
         <section class="glass-card chart-card" id="chart-card-container">
-          <div class="chart-header">
-            <h3 class="chart-title" data-i18n="chart_title">แนวโน้มพอร์ตโฟลิโอสะสม (Portfolio Growth Trend)</h3>
-            <div class="chart-actions">
-              <span class="chart-legend-dot val-dot"></span> <span class="chart-legend-text" data-i18n="chart_legend_value">มูลค่าพอร์ตสุทธิ</span>
-              <span class="chart-legend-dot cost-dot" style="margin-left: 10px;"></span> <span class="chart-legend-text" data-i18n="chart_legend_cost">เงินต้นที่ออมสะสม</span>
-              <button id="chart-touch-lock-btn" class="chart-lock-btn" type="button" aria-label="Toggle chart lock" data-i18n-title="chart_lock_btn_title">
-                <span class="lock-icon" id="chart-lock-icon">🔒</span>
-                <span class="lock-text" id="chart-lock-text" data-i18n="chart_locked_label">ล็อคสัมผัส</span>
-              </button>
+          <button type="button" class="section-toggle-btn" id="toggle-chart-btn">
+            <span class="section-toggle-title" data-i18n="chart_title">📈 แนวโน้มพอร์ตโฟลิโอสะสม (Portfolio Growth Trend)</span>
+            <span class="section-toggle-chevron" id="chart-chevron">▲</span>
+          </button>
+          <div class="collapsible-content" id="chart-collapsible">
+            <div class="chart-header">
+              <div class="chart-actions">
+                <span class="chart-legend-dot val-dot"></span> <span class="chart-legend-text" data-i18n="chart_legend_value">มูลค่าพอร์ตสุทธิ</span>
+                <span class="chart-legend-dot cost-dot" style="margin-left: 10px;"></span> <span class="chart-legend-text" data-i18n="chart_legend_cost">เงินต้นที่ออมสะสม</span>
+                <button id="chart-touch-lock-btn" class="chart-lock-btn" type="button" aria-label="Toggle chart lock" data-i18n-title="chart_lock_btn_title">
+                  <span class="lock-icon" id="chart-lock-icon">🔒</span>
+                  <span class="lock-text" id="chart-lock-text" data-i18n="chart_locked_label">ล็อคสัมผัส</span>
+                </button>
+              </div>
             </div>
-          </div>
-          <div class="chart-wrapper">
-            <div id="portfolio-growth-chart"></div>
+            <div class="chart-wrapper">
+              <div id="portfolio-growth-chart"></div>
+            </div>
           </div>
         </section>
 
@@ -199,70 +204,171 @@
           </div>
         </section>
 
-        <!-- DCA Logger Form -->
-        <section class="glass-card form-card">
-          <h3 class="form-title" data-i18n="form_title">
-            <span class="plus-icon">+</span> บันทึก DCA
-          </h3>
-          <form id="dca-log-form" class="logger-form">
-            <div class="form-grid">
-              
-              <!-- Date input -->
-              <div class="form-group">
-                <label for="input-date" data-i18n="form_date">วันที่</label>
-                <input type="date" id="input-date" required />
-              </div>
-
-              <!-- Invested Amount in Baht -->
-              <div class="form-group">
-                <label for="input-amount" id="label-input-amount" data-i18n="form_amount">จำนวนเงิน (บาท)</label>
-                <input type="number" id="input-amount" min="1" step="any" placeholder="0.00" required />
-              </div>
-
-              <!-- Purchase Price (THB/BTC) -->
-              <div class="form-group">
-                <label for="input-price" id="label-input-price" data-i18n="form_price">ราคาที่ซื้อ (บาท/BTC)</label>
-                <input type="number" id="input-price" min="1" step="any" placeholder="ป้อนราคาซื้อ" required />
-              </div>
-
-              <!-- Sat quantity (calculated hybrid) -->
-              <div class="form-group">
-                <label for="input-sat" class="sat-label">
-                  <span data-i18n="form_sat">จำนวน Sat</span>
-                  <span class="calc-tag" id="sat-calc-tag" data-i18n="form_sat_calc">(คำนวณอัตโนมัติ)</span>
-                </label>
-                <input type="number" id="input-sat" placeholder="0" />
-              </div>
-
-              <!-- Save button -->
-              <div class="form-submit-wrapper">
-                <button type="submit" class="submit-btn" id="submit-form-btn" data-i18n="form_save_btn">บันทึกข้อมูล</button>
-              </div>
-
+        <!-- Self-Custody Ratio Showcase Card -->
+        <section class="glass-card custody-card">
+          <div class="custody-header">
+            <div class="custody-title-group">
+              <span class="shield-icon">🛡️</span>
+              <span class="custody-label" data-i18n="custody_title">สัดส่วนความปลอดภัย (Self-Custody)</span>
             </div>
-          </form>
+            <span class="custody-badge" id="custody-badge">0% SECURED</span>
+          </div>
+          <div class="custody-progress-bar">
+            <div class="custody-fill" id="custody-fill" style="width: 0%;"></div>
+          </div>
+          <div class="custody-details">
+            <span id="custody-cold-text">🛡️ Cold Storage: 0.00000000 BTC (0%)</span>
+            <span id="custody-exchange-text">🏦 Exchange: 0.00000000 BTC (100%)</span>
+          </div>
         </section>
 
-        <!-- Purchase Ledger History List -->
+        <!-- DCA & Withdrawal Logger Section -->
+        <section class="glass-card form-card">
+          <button type="button" class="section-toggle-btn" id="toggle-form-btn">
+            <span class="section-toggle-title" data-i18n="form_toggle_title">📝 บันทึกข้อมูลการซื้อและโอนย้าย</span>
+            <span class="section-toggle-chevron" id="form-chevron">▲</span>
+          </button>
+          <div class="collapsible-content" id="form-collapsible">
+            <div class="form-tabs-header">
+              <button type="button" class="form-tab-btn active" id="form-tab-buy" data-i18n="form_tab_buy">➕ บันทึก DCA ซื้อ</button>
+              <button type="button" class="form-tab-btn" id="form-tab-withdraw" data-i18n="form_tab_withdraw">🛡️ บันทึกการโอนไป Cold Storage</button>
+            </div>
+
+            <!-- Buy Form -->
+            <form id="dca-log-form" class="logger-form form-pane active">
+              <div class="form-grid">
+                
+                <!-- Date input -->
+                <div class="form-group">
+                  <label for="input-date" data-i18n="form_date">วันที่</label>
+                  <input type="date" id="input-date" required />
+                </div>
+
+                <!-- Invested Amount in Baht -->
+                <div class="form-group">
+                  <label for="input-amount" id="label-input-amount" data-i18n="form_amount">จำนวนเงิน (บาท)</label>
+                  <input type="number" id="input-amount" min="1" step="any" placeholder="0.00" required />
+                </div>
+
+                <!-- Purchase Price (THB/BTC) -->
+                <div class="form-group">
+                  <label for="input-price" id="label-input-price" data-i18n="form_price">ราคาที่ซื้อ (บาท/BTC)</label>
+                  <input type="number" id="input-price" min="1" step="any" placeholder="ป้อนราคาซื้อ" required />
+                </div>
+
+                <!-- Sat quantity (calculated hybrid) -->
+                <div class="form-group">
+                  <label for="input-sat" class="sat-label">
+                    <span data-i18n="form_sat">จำนวน Sat</span>
+                    <span class="calc-tag" id="sat-calc-tag" data-i18n="form_sat_calc">(คำนวณอัตโนมัติ)</span>
+                  </label>
+                  <input type="number" id="input-sat" placeholder="0" />
+                </div>
+
+                <!-- Save button -->
+                <div class="form-submit-wrapper">
+                  <button type="submit" class="submit-btn" id="submit-form-btn" data-i18n="form_save_btn">บันทึกข้อมูล</button>
+                </div>
+
+              </div>
+            </form>
+
+            <!-- Withdrawal Form -->
+            <form id="withdrawal-log-form" class="logger-form form-pane" style="display: none;">
+              <div class="form-grid">
+                <div class="form-group">
+                  <label for="withdrawal-date" data-i18n="form_date">วันที่โอนออก</label>
+                  <input type="date" id="withdrawal-date" required />
+                </div>
+                <div class="form-group">
+                  <label for="withdrawal-sat" class="sat-label">
+                    <span data-i18n="withdrawal_amount_label">จำนวนที่โอนออก (BTC)</span>
+                    <span class="calc-tag" id="withdrawal-sat-calc">(คำนวณเป็น 0 Sats)</span>
+                  </label>
+                  <input type="number" id="withdrawal-sat" placeholder="ป้อนจำนวน BTC เช่น 0.05" step="any" min="0.00000001" required />
+                </div>
+                <div class="form-group">
+                  <label for="withdrawal-fee" data-i18n="withdrawal_fee_label">ค่าธรรมเนียมโอน (Sat Fee)</label>
+                  <input type="number" id="withdrawal-fee" placeholder="เช่น 10,000 Sat" min="0" step="1" required />
+                </div>
+                <div class="form-group">
+                  <label for="withdrawal-wallet" data-i18n="withdrawal_wallet_label">กระเป๋าปลายทาง</label>
+                  <select id="withdrawal-wallet" class="custom-select">
+                    <option value="Ledger">Ledger</option>
+                    <option value="Trezor">Trezor</option>
+                    <option value="BitBox">BitBox</option>
+                    <option value="Coldcard">Coldcard</option>
+                    <option value="Blockstream Jade">Blockstream Jade</option>
+                    <option value="Lightning Wallet">Lightning Wallet</option>
+                    <option value="Custom">ระบุชื่อเอง...</option>
+                  </select>
+                </div>
+                <div class="form-group" id="custom-wallet-wrapper" style="display: none;">
+                  <label for="withdrawal-custom-wallet" data-i18n="withdrawal_custom_wallet_label">ชื่อกระเป๋าแบบกำหนดเอง</label>
+                  <input type="text" id="withdrawal-custom-wallet" placeholder="เช่น My Nano X" />
+                </div>
+                <div class="form-submit-wrapper">
+                  <button type="submit" class="submit-btn" id="submit-withdrawal-btn" data-i18n="withdrawal_save_btn">บันทึกโอนเข้า Cold Wallet</button>
+                </div>
+              </div>
+            </form>
+          </div>
+        </section>
+
+        <!-- Purchase & Withdrawal Ledger History Cards -->
         <section class="glass-card ledger-card">
-          <h3 class="ledger-title" data-i18n="ledger_title">ประวัติการบันทึกข้อมูลการซื้อ</h3>
-          <div class="ledger-table-responsive">
-            <table class="ledger-table">
-              <thead>
-                <tr>
-                  <th data-i18n="table_date">วันที่</th>
-                  <th id="th-amount-label" data-i18n="table_amount">จำนวนเงิน (บาท)</th>
-                  <th id="th-price-label" data-i18n="table_price">ราคาซื้อ (บาท/BTC)</th>
-                  <th data-i18n="table_received_btc">ได้รับ (BTC)</th>
-                  <th data-i18n="table_received_sat">ได้รับ (SATOSHI)</th>
-                  <th id="th-profit-loss" data-i18n="table_profit_loss">กำไร/ขาดทุน</th>
-                  <th style="width: 60px; text-align: center;" data-i18n="table_manage">จัดการ</th>
-                </tr>
-              </thead>
-              <tbody id="ledger-table-body">
-                <!-- Log entries inserted here dynamically -->
-              </tbody>
-            </table>
+          <button type="button" class="section-toggle-btn" id="toggle-ledger-btn">
+            <span class="section-toggle-title" data-i18n="ledger_toggle_title">📋 ประวัติการซื้อขายและโอนย้าย</span>
+            <span class="section-toggle-chevron" id="ledger-chevron">▲</span>
+          </button>
+          <div class="collapsible-content" id="ledger-collapsible">
+            <div class="ledger-tabs-header">
+              <button type="button" class="ledger-tab-btn active" id="ledger-tab-buy" data-i18n="ledger_tab_buy">🛒 ประวัติการซื้อ (DCA)</button>
+              <button type="button" class="ledger-tab-btn" id="ledger-tab-withdraw" data-i18n="ledger_tab_withdraw">🛡️ ประวัติการโอนไป Cold Storage</button>
+            </div>
+
+            <!-- Purchase Ledger Table Pane -->
+            <div class="ledger-pane active" id="ledger-pane-buy">
+              <div class="ledger-table-responsive">
+                <table class="ledger-table">
+                  <thead>
+                    <tr>
+                      <th data-i18n="table_date">วันที่</th>
+                      <th id="th-amount-label" data-i18n="table_amount">จำนวนเงิน (บาท)</th>
+                      <th id="th-price-label" data-i18n="table_price">ราคาซื้อ (บาท/BTC)</th>
+                      <th data-i18n="table_received_btc">ได้รับ (BTC)</th>
+                      <th data-i18n="table_received_sat">ได้รับ (SATOSHI)</th>
+                      <th id="th-profit-loss" data-i18n="table_profit_loss">กำไร/ขาดทุน</th>
+                      <th style="width: 60px; text-align: center;" data-i18n="table_manage">จัดการ</th>
+                    </tr>
+                  </thead>
+                  <tbody id="ledger-table-body">
+                    <!-- Log entries inserted here dynamically -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- Withdrawal Ledger Table Pane -->
+            <div class="ledger-pane" id="ledger-pane-withdraw" style="display: none;">
+              <div class="ledger-table-responsive">
+                <table class="ledger-table">
+                  <thead>
+                    <tr>
+                      <th data-i18n="table_date">วันที่โอน</th>
+                      <th data-i18n="withdrawal_table_wallet">กระเป๋าปลายทาง</th>
+                      <th data-i18n="withdrawal_table_btc">จำนวนที่โอน (BTC)</th>
+                      <th data-i18n="withdrawal_table_sat">จำนวนที่โอน (SAT)</th>
+                      <th data-i18n="withdrawal_table_fee">ค่าธรรมเนียม (Sat)</th>
+                      <th style="width: 60px; text-align: center;" data-i18n="table_manage">จัดการ</th>
+                    </tr>
+                  </thead>
+                  <tbody id="withdrawal-table-body">
+                    <!-- Withdrawal log entries inserted here dynamically -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
           </div>
         </section>
 

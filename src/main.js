@@ -38,7 +38,8 @@ let state = {
   language: 'TH',
   isSatManual: false,
   shareBgImage: null,
-  chartLocked: true
+  chartLocked: true,
+  withdrawalRecords: []
 };
 
 // Currency Symbols Mapping
@@ -115,6 +116,7 @@ const elClearAllDataBtn = document.getElementById('clear-all-data-btn');
  */
 function saveStateToStorage() {
   localStorage.setItem('dca_portfolio_records', JSON.stringify(state.records));
+  localStorage.setItem('dca_portfolio_withdrawals', JSON.stringify(state.withdrawalRecords || []));
   localStorage.setItem('dca_portfolio_target', state.targetBtc.toString());
   localStorage.setItem('dca_portfolio_privacy', state.privacyMode.toString());
   localStorage.setItem('dca_portfolio_currency', state.displayCurrency);
@@ -187,6 +189,18 @@ function loadStateFromStorage() {
       console.error('Error loading saved records:', e);
       state.records = [];
     }
+  }
+
+  const savedWithdrawals = localStorage.getItem('dca_portfolio_withdrawals');
+  if (savedWithdrawals) {
+    try {
+      state.withdrawalRecords = JSON.parse(savedWithdrawals);
+    } catch (e) {
+      console.error('Error loading saved withdrawals:', e);
+      state.withdrawalRecords = [];
+    }
+  } else {
+    state.withdrawalRecords = [];
   }
 
   const savedTarget = localStorage.getItem('dca_portfolio_target');
@@ -278,6 +292,21 @@ const TRANSLATIONS = {
     chart_locked_label: "ล็อคสัมผัส",
     chart_unlocked_label: "ปลดล็อคแล้ว",
     chart_lock_btn_title: "สลับโหมดล็อคการสัมผัสกราฟ",
+    custody_title: "สัดส่วนความปลอดภัย (Self-Custody)",
+    form_tab_buy: "➕ บันทึก DCA ซื้อ",
+    form_tab_withdraw: "🛡️ บันทึกการโอนไป Cold Storage",
+    ledger_tab_buy: "🛒 ประวัติการซื้อ (DCA)",
+    ledger_tab_withdraw: "🛡️ ประวัติการโอนไป Cold Storage",
+    withdrawal_amount_label: "จำนวนที่โอนออก (BTC)",
+    withdrawal_fee_label: "ค่าธรรมเนียมโอน (Sat Fee)",
+    withdrawal_wallet_label: "กระเป๋าปลายทาง",
+    withdrawal_custom_wallet_label: "ชื่อกระเป๋าแบบกำหนดเอง",
+    withdrawal_save_btn: "บันทึกโอนเข้า Cold Wallet",
+    withdrawal_table_wallet: "กระเป๋าปลายทาง",
+    withdrawal_table_btc: "จำนวนที่โอน (BTC)",
+    withdrawal_table_sat: "จำนวนที่โอน (SAT)",
+    withdrawal_table_fee: "ค่าธรรมเนียม (Sat)",
+    share_switch_custody: "แสดงป้ายความปลอดภัย (Self-Custody)",
     satoshi_label: "บิตคอยน์ทั้งหมด (SATOSHI)",
     form_title: "➕ บันทึกธุรกรรม DCA ใหม่",
     form_date: "วันที่",
@@ -343,6 +372,21 @@ const TRANSLATIONS = {
     chart_locked_label: "Touch Locked",
     chart_unlocked_label: "Interactive",
     chart_lock_btn_title: "Toggle chart touch lock",
+    custody_title: "Self-Custody Security Ratio",
+    form_tab_buy: "➕ Log Buy Transaction",
+    form_tab_withdraw: "🛡️ Log Cold Storage Transfer",
+    ledger_tab_buy: "🛒 Purchase History (DCA)",
+    ledger_tab_withdraw: "🛡️ Cold Storage Transfer History",
+    withdrawal_amount_label: "Withdrawal Amount (BTC)",
+    withdrawal_fee_label: "Network Fee (Sat Fee)",
+    withdrawal_wallet_label: "Destination Wallet",
+    withdrawal_custom_wallet_label: "Custom Wallet Name",
+    withdrawal_save_btn: "Save Cold Storage Transfer",
+    withdrawal_table_wallet: "Destination Wallet",
+    withdrawal_table_btc: "Transferred (BTC)",
+    withdrawal_table_sat: "Transferred (SAT)",
+    withdrawal_table_fee: "Fee (Sat)",
+    share_switch_custody: "Show Self-Custody Badge",
     satoshi_label: "Total Bitcoin (SATOSHI)",
     form_title: "➕ Log New DCA Transaction",
     form_date: "Date",
@@ -625,7 +669,7 @@ function updateSatoshiCalculation() {
  * Render complete Dashboard calculations.
  */
 function renderUi() {
-  const stats = calculatePortfolioStats(state.records, state.btcPriceUsd, state.displayCurrency, state.rates);
+  const stats = calculatePortfolioStats(state.records, state.btcPriceUsd, state.displayCurrency, state.rates, state.withdrawalRecords);
   const livePriceTarget = state.btcPriceUsd * (state.rates[state.displayCurrency] || 1.0);
 
   // 1. Goal Progress
@@ -676,6 +720,26 @@ function renderUi() {
 
   // 3. Satoshi Card
   elTotalSatoshiDisplay.innerText = displayVal(stats.totalSatoshi, 'satoshi');
+
+  // 3.5 Self-Custody Card
+  const elCustodyBadge = document.getElementById('custody-badge');
+  const elCustodyFill = document.getElementById('custody-fill');
+  const elCustodyColdText = document.getElementById('custody-cold-text');
+  const elCustodyExchangeText = document.getElementById('custody-exchange-text');
+
+  if (elCustodyBadge && elCustodyFill && elCustodyColdText && elCustodyExchangeText) {
+    const custodyPct = stats.selfCustodyPercent || 0;
+    elCustodyBadge.innerText = `${custodyPct.toFixed(0)}% SECURED`;
+    elCustodyFill.style.width = `${Math.min(100, custodyPct)}%`;
+    
+    elCustodyColdText.innerText = state.language === 'EN'
+      ? `🛡️ Cold Storage: ${displayVal(stats.coldBtc, 'btc')} BTC (${custodyPct.toFixed(1)}%)`
+      : `🛡️ Cold Storage: ${displayVal(stats.coldBtc, 'btc')} BTC (${custodyPct.toFixed(1)}%)`;
+      
+    elCustodyExchangeText.innerText = state.language === 'EN'
+      ? `🏦 Exchange: ${displayVal(stats.exchangeBtc, 'btc')} BTC (${(100 - custodyPct).toFixed(1)}%)`
+      : `🏦 Exchange: ${displayVal(stats.exchangeBtc, 'btc')} BTC (${(100 - custodyPct).toFixed(1)}%)`;
+  }
 
   // Render portfolio trend chart
   renderChart();
@@ -744,6 +808,49 @@ function renderUi() {
       deleteTransaction(id);
     });
   });
+
+  // 5. Withdrawal Ledger Table List
+  const elWithdrawalBody = document.getElementById('withdrawal-table-body');
+  if (elWithdrawalBody) {
+    const sortedWithdrawals = [...(state.withdrawalRecords || [])].sort((a, b) => new Date(b.date) - new Date(a.date));
+    if (sortedWithdrawals.length === 0) {
+      elWithdrawalBody.innerHTML = `
+        <tr>
+          <td colspan="6" style="text-align: center; color: var(--text-muted); padding: 2rem;">
+            ${state.language === 'EN' ? 'No cold storage transfers logged yet.' : 'ยังไม่มีประวัติการโอนไป Cold Storage'}
+          </td>
+        </tr>
+      `;
+    } else {
+      elWithdrawalBody.innerHTML = sortedWithdrawals.map(w => {
+        const btcVal = (parseInt(w.amountSat) / 100000000).toFixed(8);
+        return `
+          <tr>
+            <td style="font-family: var(--font-heading); font-weight: 600; color: var(--text-secondary);">${formatThaiDate(w.date)}</td>
+            <td><span class="custody-badge" style="font-size: 0.75rem;">🛡️ ${escapeHtml(w.storageName)}</span></td>
+            <td style="color: var(--primary); font-weight: 600;">${displayVal(btcVal, 'btc')} BTC</td>
+            <td style="font-weight: 600;">${displayVal(w.amountSat, 'satoshi')} SAT</td>
+            <td style="color: var(--warning); font-weight: 600;">${displayVal(w.feeSat, 'satoshi')} SAT</td>
+            <td style="text-align: center;">
+              <button class="delete-withdrawal-btn" data-id="${w.id}" title="ลบรายการ" style="background: none; border: none; cursor: pointer; color: var(--danger);">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="3 6 5 6 21 6"></polyline>
+                  <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                </svg>
+              </button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+
+      document.querySelectorAll('.delete-withdrawal-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          const id = e.currentTarget.dataset.id;
+          deleteWithdrawalTransaction(id);
+        });
+      });
+    }
+  }
 }
 
 /**
@@ -1083,13 +1190,171 @@ function deleteTransaction(id) {
 }
 
 /**
+ * Handle Withdrawal Form Submission.
+ */
+function addWithdrawalTransaction(e) {
+  e.preventDefault();
+
+  const elDate = document.getElementById('withdrawal-date');
+  const elSat = document.getElementById('withdrawal-sat');
+  const elFee = document.getElementById('withdrawal-fee');
+  const elWallet = document.getElementById('withdrawal-wallet');
+  const elCustomWallet = document.getElementById('withdrawal-custom-wallet');
+
+  if (!elDate || !elSat || !elFee || !elWallet) return;
+
+  const date = elDate.value;
+  let rawAmount = parseFloat(elSat.value) || 0;
+  const feeSat = parseInt(elFee.value) || 0;
+  let walletName = elWallet.value;
+
+  if (walletName === 'Custom' && elCustomWallet && elCustomWallet.value.trim() !== '') {
+    walletName = elCustomWallet.value.trim();
+  }
+
+  if (!date || rawAmount <= 0) return;
+
+  // Convert BTC amount to Satoshis (1 BTC = 100,000,000 Satoshis)
+  const amountSat = Math.round(rawAmount * 100000000);
+
+  const newWithdrawal = {
+    id: Date.now().toString(),
+    date,
+    amountSat,
+    feeSat,
+    storageName: walletName
+  };
+
+  if (!state.withdrawalRecords) state.withdrawalRecords = [];
+  state.withdrawalRecords.push(newWithdrawal);
+  saveStateToStorage();
+
+  // Reset form inputs
+  elSat.value = '';
+  elFee.value = '';
+  if (elCustomWallet) elCustomWallet.value = '';
+
+  renderUi();
+}
+
+function deleteWithdrawalTransaction(id) {
+  if (confirm('คุณต้องการลบรายการบันทึกโอนเข้า Cold Wallet นี้ใช่หรือไม่?')) {
+    state.withdrawalRecords = (state.withdrawalRecords || []).filter(w => w.id !== id);
+    saveStateToStorage();
+    renderUi();
+  }
+}
+
+function initTabSwitchers() {
+  // Form Tabs (Buy vs Withdrawal)
+  const btnBuy = document.getElementById('form-tab-buy');
+  const btnWithdraw = document.getElementById('form-tab-withdraw');
+  const paneBuy = document.getElementById('dca-log-form');
+  const paneWithdraw = document.getElementById('withdrawal-log-form');
+
+  if (btnBuy && btnWithdraw && paneBuy && paneWithdraw) {
+    btnBuy.addEventListener('click', () => {
+      btnBuy.classList.add('active');
+      btnWithdraw.classList.remove('active');
+      paneBuy.style.display = 'block';
+      paneWithdraw.style.display = 'none';
+    });
+
+    btnWithdraw.addEventListener('click', () => {
+      btnWithdraw.classList.add('active');
+      btnBuy.classList.remove('active');
+      paneWithdraw.style.display = 'block';
+      paneBuy.style.display = 'none';
+    });
+  }
+
+  // Custom Wallet Input Toggle
+  const elWallet = document.getElementById('withdrawal-wallet');
+  const customWrapper = document.getElementById('custom-wallet-wrapper');
+  if (elWallet && customWrapper) {
+    elWallet.addEventListener('change', () => {
+      if (elWallet.value === 'Custom') {
+        customWrapper.style.display = 'block';
+      } else {
+        customWrapper.style.display = 'none';
+      }
+    });
+  }
+
+  // Live auto-calculation of Satoshis for Withdrawal BTC input
+  const elWithdrawalSat = document.getElementById('withdrawal-sat');
+  const elWithdrawalSatCalc = document.getElementById('withdrawal-sat-calc');
+  if (elWithdrawalSat && elWithdrawalSatCalc) {
+    elWithdrawalSat.addEventListener('input', () => {
+      const btc = parseFloat(elWithdrawalSat.value) || 0;
+      const sats = Math.round(btc * 100000000);
+      elWithdrawalSatCalc.innerText = `(คำนวณเป็น ${sats.toLocaleString()} Sats)`;
+    });
+  }
+
+  // Ledger Tabs (Buy vs Withdrawal Table)
+  const btnLedgerBuy = document.getElementById('ledger-tab-buy');
+  const btnLedgerWithdraw = document.getElementById('ledger-tab-withdraw');
+  const paneLedgerBuy = document.getElementById('ledger-pane-buy');
+  const paneLedgerWithdraw = document.getElementById('ledger-pane-withdraw');
+
+  if (btnLedgerBuy && btnLedgerWithdraw && paneLedgerBuy && paneLedgerWithdraw) {
+    btnLedgerBuy.addEventListener('click', () => {
+      btnLedgerBuy.classList.add('active');
+      btnLedgerWithdraw.classList.remove('active');
+      paneLedgerBuy.style.display = 'block';
+      paneLedgerWithdraw.style.display = 'none';
+    });
+
+    btnLedgerWithdraw.addEventListener('click', () => {
+      btnLedgerWithdraw.classList.add('active');
+      btnLedgerBuy.classList.remove('active');
+      paneLedgerWithdraw.style.display = 'block';
+      paneLedgerBuy.style.display = 'none';
+    });
+  }
+}
+
+/**
+ * Collapsible sections: toggle chart & ledger visibility with localStorage persistence.
+ */
+function initCollapsibleSections() {
+  const pairs = [
+    { btn: 'toggle-chart-btn', content: 'chart-collapsible', chevron: 'chart-chevron', key: 'dca_chart_collapsed' },
+    { btn: 'toggle-form-btn', content: 'form-collapsible', chevron: 'form-chevron', key: 'dca_form_collapsed' },
+    { btn: 'toggle-ledger-btn', content: 'ledger-collapsible', chevron: 'ledger-chevron', key: 'dca_ledger_collapsed' }
+  ];
+
+  pairs.forEach(({ btn, content, chevron, key }) => {
+    const elBtn = document.getElementById(btn);
+    const elContent = document.getElementById(content);
+    const elChevron = document.getElementById(chevron);
+    if (!elBtn || !elContent || !elChevron) return;
+
+    // Restore saved state
+    if (localStorage.getItem(key) === 'true') {
+      elContent.classList.add('collapsed');
+      elChevron.classList.add('collapsed');
+    }
+
+    elBtn.addEventListener('click', () => {
+      const isCollapsed = elContent.classList.toggle('collapsed');
+      elChevron.classList.toggle('collapsed', isCollapsed);
+      localStorage.setItem(key, isCollapsed.toString());
+    });
+  });
+}
+
+/**
  * Set current date picker default to local today.
  */
 function setDefaultDate() {
   const now = new Date();
   const offset = now.getTimezoneOffset();
-  const today = new Date(now.getTime() - (offset*60*1000));
-  elInputDate.value = today.toISOString().split('T')[0];
+  const today = new Date(now.getTime() - (offset*60*1000)).toISOString().split('T')[0];
+  if (elInputDate) elInputDate.value = today;
+  const elWithdrawalDate = document.getElementById('withdrawal-date');
+  if (elWithdrawalDate) elWithdrawalDate.value = today;
 }
 
 /**
@@ -2026,6 +2291,14 @@ async function initApp() {
 
   // Form submission
   elDcaForm.addEventListener('submit', addTransaction);
+
+  const elWithdrawalForm = document.getElementById('withdrawal-log-form');
+  if (elWithdrawalForm) {
+    elWithdrawalForm.addEventListener('submit', addWithdrawalTransaction);
+  }
+
+  initTabSwitchers();
+  initCollapsibleSections();
 
   // Bind actions
   elToggleVisibilityBtn.addEventListener('click', togglePrivacyMode);
