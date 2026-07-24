@@ -58,6 +58,19 @@ const CURRENCY_FLAGS = {
   JPY: '🇯🇵'
 };
 
+/**
+ * Escapes HTML entities to prevent XSS.
+ */
+function escapeHtml(str) {
+  if (!str) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
 // ApexCharts Instance
 let chartInstance = null;
 
