@@ -769,58 +769,57 @@ function renderUi() {
         </td>
       </tr>
     `;
-    return;
-  }
+  } else {
+    elLedgerBody.innerHTML = sortedRecords.map(r => {
+      const btcVal = parseInt(r.sat) / 100000000;
+      
+      // Convert record currency to active displayCurrency on the fly
+      const origCurrency = r.currency || 'THB';
+      const displayAmt = (parseFloat(r.amount) / (state.rates[origCurrency] || 1.0)) * (state.rates[state.displayCurrency] || 1.0);
+      const displayPrice = (parseFloat(r.price) / (state.rates[origCurrency] || 1.0)) * (state.rates[state.displayCurrency] || 1.0);
 
-  elLedgerBody.innerHTML = sortedRecords.map(r => {
-    const btcVal = parseInt(r.sat) / 100000000;
-    
-    // Convert record currency to active displayCurrency on the fly
-    const origCurrency = r.currency || 'THB';
-    const displayAmt = (parseFloat(r.amount) / (state.rates[origCurrency] || 1.0)) * (state.rates[state.displayCurrency] || 1.0);
-    const displayPrice = (parseFloat(r.price) / (state.rates[origCurrency] || 1.0)) * (state.rates[state.displayCurrency] || 1.0);
+      // Calculate dynamic profit/loss for this specific entry row
+      const currentEntryVal = btcVal * livePriceTarget;
+      const rowPl = currentEntryVal - displayAmt;
+      const rowPlPercent = displayAmt > 0 ? (rowPl / displayAmt) * 100 : 0;
 
-    // Calculate dynamic profit/loss for this specific entry row
-    const currentEntryVal = btcVal * livePriceTarget;
-    const rowPl = currentEntryVal - displayAmt;
-    const rowPlPercent = displayAmt > 0 ? (rowPl / displayAmt) * 100 : 0;
+      const plSign = rowPl >= 0 ? '+' : '';
+      const plClass = rowPl >= 0 ? 'row-profit' : 'row-loss';
+      const badgeClass = rowPl >= 0 ? 'row-pl-percent positive' : 'row-pl-percent negative';
 
-    const plSign = rowPl >= 0 ? '+' : '';
-    const plClass = rowPl >= 0 ? 'row-profit' : 'row-loss';
-    const badgeClass = rowPl >= 0 ? 'row-pl-percent positive' : 'row-pl-percent negative';
+      const absPl = Math.abs(rowPl);
+      const formattedPlText = (rowPl >= 0 ? '+' : '-') + formatCurrency(absPl);
+      const displayPlVal = state.privacyMode ? '••••' : formattedPlText;
+      const plTdContent = `<span class="${plClass}">${displayPlVal}</span> <span class="${badgeClass}">${plSign}${rowPlPercent.toFixed(2)}%</span>`;
 
-    const absPl = Math.abs(rowPl);
-    const formattedPlText = (rowPl >= 0 ? '+' : '-') + formatCurrency(absPl);
-    const displayPlVal = state.privacyMode ? '••••' : formattedPlText;
-    const plTdContent = `<span class="${plClass}">${displayPlVal}</span> <span class="${badgeClass}">${plSign}${rowPlPercent.toFixed(2)}%</span>`;
+      return `
+        <tr>
+          <td style="font-family: var(--font-heading); font-weight: 600; color: var(--text-secondary);">${formatThaiDate(r.date)}</td>
+          <td style="font-weight: 600;">${displayVal(displayAmt)}</td>
+          <td>${formatCurrency(displayPrice)}</td>
+          <td style="color: var(--primary); font-weight: 600;">${displayVal(btcVal, 'btc')}</td>
+          <td style="font-weight: 600;">${displayVal(r.sat, 'satoshi')}</td>
+          <td>${plTdContent}</td>
+          <td style="text-align: center;">
+            <button class="delete-entry-btn" data-id="${r.id}" title="ลบรายการ">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="3 6 5 6 21 6"></polyline>
+                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+              </svg>
+            </button>
+          </td>
+        </tr>
+      `;
+    }).join('');
 
-    return `
-      <tr>
-        <td style="font-family: var(--font-heading); font-weight: 600; color: var(--text-secondary);">${formatThaiDate(r.date)}</td>
-        <td style="font-weight: 600;">${displayVal(displayAmt)}</td>
-        <td>${formatCurrency(displayPrice)}</td>
-        <td style="color: var(--primary); font-weight: 600;">${displayVal(btcVal, 'btc')}</td>
-        <td style="font-weight: 600;">${displayVal(r.sat, 'satoshi')}</td>
-        <td>${plTdContent}</td>
-        <td style="text-align: center;">
-          <button class="delete-entry-btn" data-id="${r.id}" title="ลบรายการ">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-              <polyline points="3 6 5 6 21 6"></polyline>
-              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-            </svg>
-          </button>
-        </td>
-      </tr>
-    `;
-  }).join('');
-
-  // Bind individual row delete event listeners
-  document.querySelectorAll('.delete-entry-btn').forEach(btn => {
-    btn.addEventListener('click', (e) => {
-      const id = e.currentTarget.dataset.id;
-      deleteTransaction(id);
+    // Bind individual row delete event listeners
+    document.querySelectorAll('.delete-entry-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const id = e.currentTarget.dataset.id;
+        deleteTransaction(id);
+      });
     });
-  });
+  }
 
   // 5. Withdrawal Ledger Table List
   const elWithdrawalBody = document.getElementById('withdrawal-table-body');
